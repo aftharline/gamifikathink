@@ -9,6 +9,11 @@ export interface ModelViewerElementAttributes
   "ar-modes"?: string
   "ar-scale"?: string
   "camera-controls"?: boolean
+  "camera-target"?: string
+  "camera-orbit"?: string
+  "field-of-view"?: string
+  "min-camera-orbit"?: string
+  "max-camera-orbit"?: string
   "auto-rotate"?: boolean
   "animation-name"?: string
   autoplay?: boolean

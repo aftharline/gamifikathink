@@ -28,7 +28,9 @@ export interface ArModel {
   title: string
   description: string
   glb: string // "/models/<id>/model.glb"
-  usdz: string // "/models/<id>/model.usdz"
+  /** Opsional — kosongkan bila belum ada USDZ asli (jangan pakai duplikat
+   *  model lain: Quick Look akan menampilkan model yang salah). */
+  usdz?: string // "/models/<id>/model.usdz"
   poster: string
   license: ArModelLicense
   /** Daftar aset yang masih sementara dan wajib diganti (lihat AR_PLAN.md §3). */
@@ -42,6 +44,18 @@ export interface ArModel {
    * hotspot presisi hanya valid di pose diam (mis. dragon).
    */
   autoplay?: boolean
+  /**
+   * Framing kamera awal (opsional, format atribut model-viewer).
+   * Isi bila bounding box model tidak proporsional sehingga auto-frame
+   * bawaan membuat subjek utama tampak terlalu kecil (mis. Ryuri:
+   * segmen rambut & ekor menjuntai ±35 m ke bawah, karakter utama
+   * 1,3 m hanya ~4% viewport bila di-fit penuh).
+   */
+  cameraTarget?: string // mis. "0m 0.8m 0m"
+  cameraOrbit?: string // mis. "0deg 75deg 2.8m"
+  fieldOfView?: string // mis. "30deg"
+  minCameraOrbit?: string // mis. "auto auto 1m"
+  maxCameraOrbit?: string // mis. "auto auto 25m"
   hotspots: ArHotspot[]
   quiz: ArQuizItem[]
   xp: { open: number; hotspotsAll: number; quiz: number }
@@ -408,30 +422,44 @@ export const AR_MODELS: ArModel[] = [
     subject: "Special",
     title: "Ryuri — Spirit Companion",
     description:
-      "Karakter pendamping magis Ryuri. Jelajahi 4 pose animasi interaktifnya ('Idle', 'Idle_Static', 'Run', 'T_Pose'), lalu tempatkan ia di sisimu lewat AR.",
-    glb: "/models/ryuri/model-v2.glb",
-    usdz: "/models/ryuri/model-v2.usdz",
+      "Karakter pendamping magis Ryuri. Karakter 1,3 m difokuskan otomatis oleh kamera (segmen rambut & ekor aset mentah menjuntai jauh ke bawah — zoom out untuk melihat utuh), lalu tempatkan ia di sisimu lewat Kamera AR Web.",
+    glb: "/models/ryuri/model-v3.glb",
+    // USDZ asli belum ada — file lama adalah duplikat kubus (dihapus).
+    // Sengaja dikosongkan agar Quick Look tidak menampilkan model yang salah.
     poster: "/models/ryuri/poster-v2.svg",
     license: {
       author: "Aset pribadi GamifikaThink",
       name: "Milik internal — Special Release",
     },
-    animations: ["Idle", "Idle_Static", "Run", "T_Pose"],
+    placeholderAssets: ["usdz", "poster"],
+    // Urutan sesuai isi GLB; default Idle_Static (6 channel, pose diam ringan).
+    // autoplay:false seperti dragon — klip Idle/Run (645 channel) berisiko
+    // root-motion menggeser framing + hotspot hanya valid di pose diam.
+    animations: ["Idle_Static", "Idle", "Run", "T_Pose"],
+    autoplay: false,
     deferLoad: true,
+    // Framing eksplisit ke karakter utama (kepala Y≈1,1–1,3; badan Y≈0–1,1).
+    // Tanpa ini auto-frame mem-fit bbox 36 m sehingga karakter tak terlihat.
+    // Terverifikasi visual via screenshot headless (2026-09-17).
+    cameraTarget: "0m 1m 0m",
+    cameraOrbit: "0deg 72deg 7m",
+    fieldOfView: "40deg",
+    minCameraOrbit: "auto auto 1.5m",
+    maxCameraOrbit: "auto auto 40m",
     hotspots: [
       {
         id: "karakter",
-        position: "0 1.2 0",
+        position: "0 1.15 0.12",
         normal: "0 0 1",
         title: "Ryuri Spirit",
-        body: "Karakter pendamping magis dengan kekuatan mistis dan animasi dinamis.",
+        body: "Karakter pendamping magis dengan kekuatan mistis dan animasi dinamis. Wajah & tanduk berada di sekitar titik ini.",
       },
       {
         id: "aura",
         position: "0 0.6 0.5",
-        normal: "0 1 0",
+        normal: "0 0.2 1",
         title: "Aura Magis",
-        body: "Perisai energi misterius yang mengelilingi karakter Ryuri.",
+        body: "Perisai energi misterius yang mengelilingi karakter Ryuri. Titik ini melayang di depan badan agar tidak tertanam di mesh.",
       },
     ],
     quiz: [

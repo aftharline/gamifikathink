@@ -238,12 +238,17 @@ export function ArViewer({
           <model-viewer
             ref={viewerRef}
             src={model.glb}
-            ios-src={model.usdz}
+            ios-src={model.usdz || undefined}
             poster={model.poster}
             ar
             ar-modes="scene-viewer quick-look webxr"
             ar-scale="auto"
             camera-controls
+            camera-target={model.cameraTarget || undefined}
+            camera-orbit={model.cameraOrbit || undefined}
+            field-of-view={model.fieldOfView || undefined}
+            min-camera-orbit={model.minCameraOrbit || undefined}
+            max-camera-orbit={model.maxCameraOrbit || undefined}
             autoplay={playing || undefined}
             animation-name={animationName || undefined}
             auto-rotate={autoRotate || undefined}
@@ -311,6 +316,11 @@ export function ArViewer({
         {arFailed && (
           <p className="absolute inset-x-0 bottom-16 mx-auto w-fit rounded-lg bg-black/70 px-3 py-1.5 font-mono text-[11px] text-amber-200">
             Native AR tidak tersedia — gunakan tombol Kamera AR Web di atas
+          </p>
+        )}
+        {!model.usdz && loaded && (
+          <p className="absolute inset-x-0 top-3 mx-auto w-fit rounded-lg bg-black/70 px-3 py-1.5 font-mono text-[11px] text-[var(--text-secondary)]">
+            USDZ iOS menyusul — AR tersedia via Kamera AR Web
           </p>
         )}
       </div>
