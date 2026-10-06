@@ -1,4 +1,4 @@
-# AR Plan — GamifikaThink: Lihat Objek 3D + Interaksi
+# AR Plan: GamifikaThink, Lihat Objek 3D + Interaksi
 
 > Dokumen rencana + tracking progress fitur AR.
 > Terakhir diperbarui: 2026-09-16 | Status: `FASE 1 SEBAGIAN` (kuis + misi XP + integrasi Arena/Mantra hijau; 4 model + uji perangkat fisik TODO)
@@ -32,7 +32,7 @@
 ### Batasan platform yang memengaruhi desain
 
 - **Hotspot HTML, kuis, dan anotasi TIDAK ikut masuk ke mode AR** Quick Look / Scene Viewer. Pola UX resmi: **interaksi di mode 3D viewer, tombol AR untuk "lihat ukuran asli"**.
-- iOS Safari tidak mendukung WebXR generik — hanya Quick Look via `ios-src`.
+- iOS Safari tidak mendukung WebXR generik, hanya Quick Look via `ios-src`.
 - `<model-viewer>` tidak butuh `getUserMedia`; kamera dibuka oleh aplikasi AR bawaan OS.
 
 ## 3. Katalog aset MVP
@@ -49,18 +49,18 @@ public/models/<id>/poster.webp
 
 | ID | Mapel | Model gratis (contoh sumber) | Animasi target | Hotspot (rencana) | Status |
 |----|-------|------------------------------|----------------|-------------------|--------|
-| `kubus-prisma` | Matematika | Khronos `BoxAnimated` / prisma | rotasi / auto-rotate | sisi, rusuk, titik sudut | - [x] glb (ASET PRIBADI `newglb/newcubic.glb` — Rubik 3×3 animasi rakit, 1.2 MB, 2026-09-16; klip `Animation`) - [x] usdz (`model-v2.usdz` ASLI hasil konversi three USDZExporter + `quickLookCompatible`, 3.4 MB, ter-validasi pxr: 10 mesh + world bounds = GLB, 2026-09-17) - [x] poster (screenshot render asli 2026-09-16) |
+| `kubus-prisma` | Matematika | Khronos `BoxAnimated` / prisma | rotasi / auto-rotate | sisi, rusuk, titik sudut | - [x] glb (ASET PRIBADI `newglb/newcubic.glb`: Rubik 3×3 animasi rakit, 1.2 MB, 2026-09-16; klip `Animation`) - [x] usdz (`model-v2.usdz` ASLI hasil konversi three USDZExporter + `quickLookCompatible`, 3.4 MB, ter-validasi pxr: 10 mesh + world bounds = GLB, 2026-09-17) - [x] poster (screenshot render asli 2026-09-16) |
 | `molekul-h2o` | Kimia | Molekul H2O (Poly.pizza / Sketchfab CC-BY) | auto-rotate | atom O, atom H, sudut ikatan | - [ ] glb - [ ] usdz - [ ] poster |
-| `magnet-batang` | Fisika | U-Magnet / bar magnet | — (hotspot only) | kutub U, kutub S, garis gaya | - [ ] glb - [ ] usdz - [ ] poster |
+| `magnet-batang` | Fisika | U-Magnet / bar magnet | kosong (hotspot only) | kutub U, kutub S, garis gaya | - [ ] glb - [ ] usdz - [ ] poster |
 | `bandul` | Fisika | Pendulum sederhana | ayun (bila ada clip) | tali, beban, titik gantung | - [ ] glb - [ ] usdz - [ ] poster |
-| `castle` | B. Inggris (vocab) | Castle Quaternius | — | tower, gate, wall (+ kosakata EN) | - [ ] glb - [ ] usdz - [ ] poster |
-| `grammar-dragon` | Boss Battle | Dragon low-poly animasi idle | `idle` / `attack` selector | kepala, sayap, ekor | - [x] glb (ASET PRIBADI `newglb/newdragon.glb` — Mountain Dragon, klip `Take 001`; dinormalisasi ×0.001 + diangkat agar pas AR; dioptimasi quantize+webp 17.6→5.97 MB TANPA draco agar bebas decoder CDN, 2026-09-16) - [x] usdz (`model-v2.usdz` ASLI hasil konversi three USDZExporter + `quickLookCompatible` + tekstur 512px, 3.4 MB, ter-validasi pxr: 2 mesh + tekstur, 2026-09-17) - [x] poster (screenshot render asli 2026-09-16) |
+| `castle` | B. Inggris (vocab) | Castle Quaternius | belum ada | tower, gate, wall (+ kosakata EN) | - [ ] glb - [ ] usdz - [ ] poster |
+| `grammar-dragon` | Boss Battle | Dragon low-poly animasi idle | `idle` / `attack` selector | kepala, sayap, ekor | - [x] glb (ASET PRIBADI `newglb/newdragon.glb`: Mountain Dragon, klip `Take 001`; dinormalisasi ×0.001 + diangkat agar pas AR; dioptimasi quantize+webp 17.6→5.97 MB TANPA draco agar bebas decoder CDN, 2026-09-16) - [x] usdz (`model-v2.usdz` ASLI hasil konversi three USDZExporter + `quickLookCompatible` + tekstur 512px, 3.4 MB, ter-validasi pxr: 2 mesh + tekstur, 2026-09-17) - [x] poster (screenshot render asli 2026-09-16) |
 
 Sumber gratis yang diizinkan: KhronosGroup `glTF-Sample-Models`, Poly.pizza, Quaternius, Sketchfab dengan filter lisensi CC-BY / CC0. Setiap model wajib dicatat lisensinya (lihat skema §4).
 
-Budget per model: **< 5 MB (ideal 1–3 MB)**, < 100k poligon, tekstur ≤ 2048px, kompresi Draco/KTX2 bila perlu. (Pengecualian tercatat 2026-09-16: dragon pribadi 5.97 MB — di atas ideal tapi di bawah batas tolak 8 MB. Draco DITOLAK karena butuh decoder CDN eksternal (melanggar §11 + merusak offline); dipakai quantize + webp + resize 1024 tanpa decoder eksternal.)
+Budget per model: **< 5 MB (ideal 1–3 MB)**, < 100k poligon, tekstur ≤ 2048px, kompresi Draco/KTX2 bila perlu. (Pengecualian tercatat 2026-09-16: dragon pribadi 5.97 MB, di atas ideal tapi di bawah batas tolak 8 MB. Draco DITOLAK karena butuh decoder CDN eksternal (melanggar §11 + merusak offline); dipakai quantize + webp + resize 1024 tanpa decoder eksternal.)
 
-## 4. Skema data — `src/lib/ar-catalog.ts` (✅ dibuat 2026-09-16, + field `placeholderAssets?: ("glb"|"usdz"|"poster")[]` untuk tracking aset sementara)
+## 4. Skema data: `src/lib/ar-catalog.ts` (✅ dibuat 2026-09-16, + field `placeholderAssets?: ("glb"|"usdz"|"poster")[]` untuk tracking aset sementara)
 
 ```ts
 interface ArHotspot {
@@ -111,7 +111,7 @@ Catatan: `ArQuizItem` sengaja dibentuk sama dengan `QuizQuestion` di `src/lib/qu
 - [x] **2. Optimasi** → Blender / `gltfpack`: hapus kamera & lampu berlebih, resize tekstur, target < 5 MB. (Tidak diperlukan: 12 KB & 163 KB, 2026-09-16.)
 - [x] **3. Konversi iOS** → `model.glb` → `model.usdz` (Apple Reality Converter / `usdzconvert` / eksportir Vectary). Cek ukuran tidak bengkak > 2x dan material tidak rusak. (SELESAI 2026-09-17 via three.js USDZExporter di headless Chrome + driver DevTools-WS + `quickLookCompatible:true` (kubus 3.4 MB, dragon 3.4 MB tekstur 512px); validasi pxr `Usd.Stage.Open` + BBoxCache. Sisa: bukti Quick Look di iPhone nyata.)
 - [x] **4. Poster** → screenshot orbit 45° sebagai `poster.webp` (+ thumbnail grid bila perlu). (Sementara: poster grafis placeholder PIL, WAJIB diganti screenshot model.)
-- [x] **5. Hotspot** → buka model di penampil glTF / `<model-viewer>` mode debug, salin `data-position` / `data-normal`, masukkan ke `ar-catalog.ts`. (Rubik: badan statis (0.08,1.16,6.42) sisi 2.24 — sisi `(0.08,1.16,7.57)`, rusuk `(0.08,2.301,7.561)`, sudut `(1.22,2.30,7.56)`, terverifikasi screenshot. Dragon: pose diam + autoplay=false karena `Take 001` menggerakkan seluruh badan — kepala `(0.1,1.57,1.15)`, badan/punggung `(0,1.6,1.2)`, sayap `(0.9,1.63,0.3)`, terverifikasi screenshot per label. ATURAN PENTING: jangkar WAJIB di udara luar permukaan — model-viewer menyembunyikan hotspot yang tertanam di dalam mesh.)
+- [x] **5. Hotspot** → buka model di penampil glTF / `<model-viewer>` mode debug, salin `data-position` / `data-normal`, masukkan ke `ar-catalog.ts`. (Rubik: badan statis (0.08,1.16,6.42) sisi 2.24, sisi `(0.08,1.16,7.57)`, rusuk `(0.08,2.301,7.561)`, sudut `(1.22,2.30,7.56)`, terverifikasi screenshot. Dragon: pose diam + autoplay=false karena `Take 001` menggerakkan seluruh badan, kepala `(0.1,1.57,1.15)`, badan/punggung `(0,1.6,1.2)`, sayap `(0.9,1.63,0.3)`, terverifikasi screenshot per label. ATURAN PENTING: jangkar WAJIB di udara luar permukaan, model-viewer menyembunyikan hotspot yang tertanam di dalam mesh.)
 - [x] **6. Daftarkan** → tambah entri `ArModel` + 2–4 hotspot + 2–3 kuis + lisensi. (Selesai untuk 2 model; data kuis sudah ada, UI kuis di Fase 1.)
 
 Urutan pembuktian pipeline: kerjakan **`kubus-prisma` + `grammar-dragon` dulu** (1 statis + 1 animasi). Lanjut 4 sisanya setelah Quick Look terbukti jalan.
@@ -129,23 +129,23 @@ src/app/ar/[id]/page.tsx   → /ar/<id> (viewer + misi + kuis + kredit lisensi, 
 
 | File | Tanggung jawab |
 |------|----------------|
-| `src/types/model-viewer.d.ts` | Deklarasi JSX `model-viewer` + event `ar-status`, `progress`, `load` (agar `tsc` lolos) | ✅ 2026-09-16 (augmentasi `react` JSX, bukan global — React 19) |
+| `src/types/model-viewer.d.ts` | Deklarasi JSX `model-viewer` + event `ar-status`, `progress`, `load` (agar `tsc` lolos) | ✅ 2026-09-16 (augmentasi `react` JSX, bukan global: React 19) |
 | `src/components/ar-viewer.tsx` | `"use client"`, dimuat `next/dynamic ssr:false`; wrapper `<model-viewer>` (detail §7) | ✅ 2026-09-16 (hotspot + animasi + progress + ar-status + fallback error) |
 | `src/components/ar-model-card.tsx` | Kartu katalog (poster, badge mapel, tombol Buka) | ✅ 2026-09-16 (+ badge "Aset sementara") |
 | `src/components/ar-quiz.tsx` | Sheet kuis per model; reuse gaya boss-battle + `sfx` + `celebrate()` | ✅ 2026-09-16 (alir mulai→soal→pembahasan→hasil; lulus = semua benar → `onPassed`; terpasang di `/ar/[id]`) |
-| `src/components/ar-missions.tsx` | 3 misi XP + cooldown localStorage 24 jam | ✅ 2026-09-16 (+ hook `src/hooks/use-ar-missions.ts`: klaim via `grantXp` di event handler, bukan effect — patuh aturan hooks; badge Selesai/+XP) |
+| `src/components/ar-missions.tsx` | 3 misi XP + cooldown localStorage 24 jam | ✅ 2026-09-16 (+ hook `src/hooks/use-ar-missions.ts`: klaim via `grantXp` di event handler, bukan effect, patuh aturan hooks; badge Selesai/+XP) |
 
 ### Edit file lama
 
 | File | Perubahan |
 |------|-----------|
-| `package.json` | Tambah `@google/model-viewer` (+ types bila perlu) | ✅ 2026-09-16 (v4.3.1, tanpa types tambahan — deklarasi lokal; + `three@^0.183.0` eksplisit sebagai peer dep model-viewer) |
-| `next.config.ts` | Header `Cache-Control: public, max-age=31536000, immutable` untuk `/models/*` | ✅ 2026-09-16 (+ `Content-Type: model/vnd.usdz+zip` untuk `model.usdz` — Next tidak mengenal MIME usdz) |
+| `package.json` | Tambah `@google/model-viewer` (+ types bila perlu) | ✅ 2026-09-16 (v4.3.1, tanpa types tambahan, deklarasi lokal; + `three@^0.183.0` eksplisit sebagai peer dep model-viewer) |
+| `next.config.ts` | Header `Cache-Control: public, max-age=31536000, immutable` untuk `/models/*` | ✅ 2026-09-16 (+ `Content-Type: model/vnd.usdz+zip` untuk `model.usdz`, Next tidak mengenal MIME usdz) |
 | `public/sw.js` | JANGAN precache `/models/*` di `APP_SHELL`; tambah runtime cache terpisah berkuota (atau `network-first`) | ✅ 2026-09-16 (cache `gamifikathink-models` cache-first + dikecualikan dari pembersihan activate) |
-| `src/middleware.ts` | Kecualikan `.glb`, `.usdz`, `/models/`, `/ar` dari matcher (pelajaran dari insiden manifest/SW ke-redirect `/login`) | ✅ 2026-09-16 (parsial: `models/` + `*.glb/*.usdz` dikecualikan; halaman `/ar` SENGAJA tetap di balik auth konsisten dengan `/arena` — lihat catatan §9) |
+| `src/middleware.ts` | Kecualikan `.glb`, `.usdz`, `/models/`, `/ar` dari matcher (pelajaran dari insiden manifest/SW ke-redirect `/login`) | ✅ 2026-09-16 (parsial: `models/` + `*.glb/*.usdz` dikecualikan; halaman `/ar` SENGAJA tetap di balik auth konsisten dengan `/arena`, lihat catatan §9) |
 | `src/lib/supabase/middleware.ts` | Allowlist path yang sama di `updateSession()` (defense in depth) | ✅ 2026-09-16 (parsial, sama seperti di atas) |
 | `src/components/sidebar.tsx` | Tambah `menuItems`: `{ href: "/ar", label: "AR Lab", icon: Boxes }` (+ versi collapsed otomatis ikut) | ✅ 2026-09-16 |
-| Arena (`arena/page.tsx` / `chat-interface.tsx`) | Chip "Model AR terkait" via `getRelatedModels(subject)` — tanpa AI dulu | ✅ 2026-09-16 (chip di empty-state arena + link "Lihat Versi 3D" di detail Buku Mantra) |
+| Arena (`arena/page.tsx` / `chat-interface.tsx`) | Chip "Model AR terkait" via `getRelatedModels(subject)`, tanpa AI dulu | ✅ 2026-09-16 (chip di empty-state arena + link "Lihat Versi 3D" di detail Buku Mantra) |
 | `buku-mantra/page.tsx` | Link "Lihat versi 3D" bila riwayat cocok mapel (opsional MVP) |
 
 ## 7. Spesifikasi `ar-viewer.tsx`
@@ -174,7 +174,7 @@ Atribut `<model-viewer>` MVP:
 
 Perilaku wajib:
 
-- [x] Progress bar dari event `progress` + `poster` selama loading; `loading="lazy"`, grid hanya render poster (jangan autoplay semua model). (Revisi 2026-09-16: halaman detail pakai `loading="eager"` + `reveal="auto"` agar model langsung dimuat tanpa perlu klik — lihat catatan diagnosis di bawah; + badge teks status `Menyiapkan penampil…` / `Memuat model 3D… N%`. Katalog tetap poster-only.)
+- [x] Progress bar dari event `progress` + `poster` selama loading; `loading="lazy"`, grid hanya render poster (jangan autoplay semua model). (Revisi 2026-09-16: halaman detail pakai `loading="eager"` + `reveal="auto"` agar model langsung dimuat tanpa perlu klik, lihat catatan diagnosis di bawah; + badge teks status `Menyiapkan penampil…` / `Memuat model 3D… N%`. Katalog tetap poster-only.)
 - [x] Hotspot diklik → panel anotasi + `sfx.click()`; tandai `visited`; saat semua dikunjungi → misi selesai. (Callback `onAllHotspotsVisited` sudah dipanggil; UI misi menyusul Fase 1.)
 - [x] Kontrol animasi: tombol play/pause + dropdown `animation-name` bila `animations.length > 1`; fallback `auto-rotate` bila model tanpa clip. (+ toggle rotasi, hormati `prefers-reduced-motion`.)
 - [x] `ar-status="failed"` → toast "AR tidak didukung di perangkat ini, mode 3D tetap bisa dipakai" + banner Desktop "Buka di HP untuk AR". (`session-started` → toast + callback `onArSessionStarted` untuk misi XP Fase 1.)
@@ -197,7 +197,7 @@ Kunci cooldown: `localStorage "ar-xp-<modelId>-<mission>"` berisi timestamp. Bil
 
 ## 9. PWA, middleware, dan MIME (jebakan yang sudah pernah terjadi)
 
-- [x] Matcher `src/middleware.ts` + allowlist `updateSession()` mencakup: `/ar`, `/models/`, `*.glb`, `*.usdz` (saat ini matcher hanya mengecualikan `sw.js`, `manifest.webmanifest`, `icons/`, dan gambar umum). (Keputusan final 2026-09-16: **aset** `models/*.glb/*.usdz` publik — Scene Viewer/Quick Look fetch tanpa cookie sesi; **halaman** `/ar` tetap di balik auth konsisten dengan `/arena`/`/kuis`.)
+- [x] Matcher `src/middleware.ts` + allowlist `updateSession()` mencakup: `/ar`, `/models/`, `*.glb`, `*.usdz` (saat ini matcher hanya mengecualikan `sw.js`, `manifest.webmanifest`, `icons/`, dan gambar umum). (Keputusan final 2026-09-16: **aset** `models/*.glb/*.usdz` publik, Scene Viewer/Quick Look fetch tanpa cookie sesi; **halaman** `/ar` tetap di balik auth konsisten dengan `/arena`/`/kuis`.)
 - [x] Verifikasi production: `.glb → model/gltf-binary`, `.usdz → model/vnd.usdz+zip` via `curl -I` (bukan redirect `/login`, bukan `text/html`). (Terverifikasi 2026-09-16 di `next start` lokal: glb 200 `model/gltf-binary`, usdz 200 `model/vnd.usdz+zip` setelah header kustom, tanpa sesi login.)
 - [ ] Wajib HTTPS (Vercel production ok; `localhost` ok untuk dev).
 - [x] PWA tetap valid: manifest/icons tidak berubah; halaman `/ar` ikut app-shell, model tidak ikut precache. (`build` hijau, `/manifest.webmanifest` tetap ter-generate.)
@@ -211,10 +211,10 @@ Kunci cooldown: `localStorage "ar-xp-<modelId>-<mission>"` berisi timestamp. Bil
 
 ## 11. Keamanan, privasi, lisensi
 
-- [x] `<model-viewer>` tidak meminta `getUserMedia` sendiri — jangan tambah `Permissions-Policy: camera` kecuali memakai WebRTC sendiri nanti.
+- [x] `<model-viewer>` tidak meminta `getUserMedia` sendiri, jangan tambah `Permissions-Policy: camera` kecuali memakai WebRTC sendiri nanti.
 - [ ] Upload model (bila dibuka ke user di masa depan): validasi ekstensi + magic bytes + batas size; simpan privat + signed URL, bukan bucket publik.
 - [x] Kredit lisensi tampil di tiap halaman detail + (opsional) satu halaman `/ar/kredit`. (Tampil di `/ar/[id]`; halaman kredit khusus belum ada.)
-- [x] CSP `next.config.ts` ditinjau agar tidak memblokir `blob:`/model internal (tetap self-host via npm, bukan CDN script). (Tidak ada perubahan diperlukan — tidak ada script eksternal.)
+- [x] CSP `next.config.ts` ditinjau agar tidak memblokir `blob:`/model internal (tetap self-host via npm, bukan CDN script). (Tidak ada perubahan diperlukan, tidak ada script eksternal.)
 
 ## 12. Testing & acceptance criteria
 
@@ -248,27 +248,27 @@ curl -I http://localhost:3000/models/kubus-prisma/model.usdz
 
 ## 13. Fase rollout + tracking
 
-### Fase 0 — Bukti pipeline (2–3 hari) — `SELESAI 2026-09-16`
+### Fase 0: Bukti pipeline (2–3 hari), `SELESAI 2026-09-16`
 
-- [x] `ar-catalog.ts` + 2 model (`kubus-prisma`, `grammar-dragon`) lengkap glb/usdz/poster. (glb asli; usdz + poster masih placeholder — lihat §3.)
+- [x] `ar-catalog.ts` + 2 model (`kubus-prisma`, `grammar-dragon`) lengkap glb/usdz/poster. (glb asli; usdz + poster masih placeholder, lihat §3.)
 - [x] `model-viewer.d.ts` + `ar-viewer.tsx` + `/ar` + `/ar/[id]` minimal (view + hotspot). (+ kartu katalog, kontrol animasi, ar-status, menu sidebar, SW/headers/middleware; `lint`+`typecheck`+`build` hijau.)
-- [ ] Quick Look terbukti di 1 iPhone nyata. (Butuh perangkat fisik — belum dilakukan.)
+- [ ] Quick Look terbukti di 1 iPhone nyata. (Butuh perangkat fisik, belum dilakukan.)
 
-### Fase 1 — MVP penuh (total 1–2 minggu) — `SEBAGIAN 2026-09-16`
+### Fase 1: MVP penuh (total 1–2 minggu), `SEBAGIAN 2026-09-16`
 
 - [ ] 4 model sisa (`molekul-h2o`, `magnet-batang`, `bandul`, `castle`) + kuis. (Data + UI kuis selesai untuk 2 model aktif; TERBLOKIR: butuh file `.glb` dari user seperti `newglb/`.)
 - [x] `ar-missions.tsx` + `ar-quiz.tsx` + wiring callback viewer (`onArSessionStarted`, `onAllHotspotsVisited`, `onPassed`).
 - [x] Sidebar "AR Lab" + chip terkait di Arena + link Buku Mantra. (Sidebar sejak Fase 0.)
 - [x] SW runtime cache model + header `/models/*` + allowlist middleware. (Sejak Fase 0; versi cache naik ke v2 saat cache-busting.)
-- [ ] Matriks perangkat + acceptance §12 hijau. (Butuh HP Android + iPhone fisik — tugas pengguna.)
+- [ ] Matriks perangkat + acceptance §12 hijau. (Butuh HP Android + iPhone fisik, tugas pengguna.)
 
-### Fase 2 — Pendalaman (opsional)
+### Fase 2: Pendalaman (opsional)
 
 - [ ] AI Arena menyarankan model otomatis berdasarkan soal.
 - [ ] Anotasi lanjutan (audio SFX per hotspot, narasi TTS).
 - [ ] Pindah aset ke Supabase Storage `ar-models` + CDN bila `public/` membengkak.
 
-### Fase 3 — Di luar MVP
+### Fase 3: Di luar MVP
 
 - [ ] Marker "scan kartu mantra" (MindAR) atau WebXR markerless (`react-three-fiber`).
 - [ ] Boss battle AR interaktif penuh.
@@ -303,4 +303,4 @@ curl -I http://localhost:3000/models/kubus-prisma/model.usdz
 | 2026-09-16 | Fase 1 sebagian: `ar-quiz.tsx` (alir mulai→hasil, lulus = semua benar), `use-ar-missions.ts` + `ArMissions` (klaim XP via `grantXp` di handler + cooldown localStorage 24 jam), wiring di `/ar/[id]`, chip AR di empty-state Arena + seksi 3D di Buku Mantra. `lint`/`typecheck`/`build` hijau. Sisa: 4 model (butuh file user) + uji perangkat fisik. |
 
 ---
-*Ceklis di dokumen ini adalah tracker resmi. Tandai `[x]` setiap item selesai; jangan hapus baris — coret dengan tetap menyimpan riwayat.*
+*Ceklis di dokumen ini adalah tracker resmi. Tandai `[x]` setiap item selesai; jangan hapus baris, coret dengan tetap menyimpan riwayat.*

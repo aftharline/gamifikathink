@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { toast } from "sonner"
 import { grantXp } from "@/lib/xp-events"
 import { sfx } from "@/lib/feedback"
@@ -60,14 +60,23 @@ const MISSION_META: Record<
 const MISSION_IDS: ArMissionId[] = ["open", "hotspots", "quiz"]
 
 export function useArMissions(model: ArModel | undefined) {
-  // Status klaim dibaca sekali dari localStorage (anti-farm 1x sehari).
-  // Pemeriksaan kedaluwarsa terjadi di notify(); tampilan pulih otomatis
-  // begitu aksi diulangi setelah cooldown lewat.
-  const [claimed, setClaimed] = useState<Record<ArMissionId, boolean>>(() => ({
-    open: model ? readTs(model.id, "open") !== null : false,
-    hotspots: model ? readTs(model.id, "hotspots") !== null : false,
-    quiz: model ? readTs(model.id, "quiz") !== null : false,
-  }))
+  // Init selalu false agar render server = render klien pertama (anti hydration
+  // mismatch); status klaim localStorage disinkronkan di effect di bawah.
+  const [claimed, setClaimed] = useState<Record<ArMissionId, boolean>>({
+    open: false,
+    hotspots: false,
+    quiz: false,
+  })
+
+  useEffect(() => {
+    if (!model) return
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- sinkronisasi storage-ke-state pasca-hydration
+    setClaimed({
+      open: readTs(model.id, "open") !== null,
+      hotspots: readTs(model.id, "hotspots") !== null,
+      quiz: readTs(model.id, "quiz") !== null,
+    })
+  }, [model])
 
   const notify = useCallback(
     async (id: ArMissionId) => {
@@ -76,7 +85,7 @@ export function useArMissions(model: ArModel | undefined) {
       const last = readTs(model.id, id)
       if (last !== null && now - last < COOLDOWN_MS) {
         toast.info(
-          `Misi sudah diklaim — tersedia lagi dalam ${formatCooldown(COOLDOWN_MS - (now - last))}`
+          `Misi sudah diklaim, tersedia lagi dalam ${formatCooldown(COOLDOWN_MS - (now - last))}`
         )
         return
       }
@@ -89,7 +98,7 @@ export function useArMissions(model: ArModel | undefined) {
       window.localStorage.setItem(key(model.id, id), String(now))
       setClaimed((prev) => ({ ...prev, [id]: true }))
       sfx.correct()
-      toast.success(`+${amount} XP — ${MISSION_META[id].title}!`)
+      toast.success(`+${amount} XP: ${MISSION_META[id].title}!`)
     },
     [model]
   )

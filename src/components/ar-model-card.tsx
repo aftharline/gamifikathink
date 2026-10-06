@@ -25,13 +25,13 @@ export function ArModelCard({ model }: { model: ArModel }) {
       </Link>
       <div className="p-4">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="rounded-md bg-[var(--secondary)] px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-[var(--text-secondary)]">
+          <span className="rounded-md bg-[var(--secondary)] px-2 py-0.5 text-[11px] text-[var(--text-secondary)]">
             {model.subject}
           </span>
           {model.placeholderAssets && model.placeholderAssets.length > 0 && (
             <span
-              title={`Aset sementara (${model.placeholderAssets.join(", ")}) — akan diganti aset pribadi`}
-              className="rounded-md bg-amber-500/15 px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-amber-300"
+              title={`Aset sementara (${model.placeholderAssets.join(", ")}), akan diganti aset pribadi`}
+              className="rounded-md bg-amber-500/15 px-2 py-0.5 text-[11px] text-amber-300"
             >
               Aset sementara
             </span>

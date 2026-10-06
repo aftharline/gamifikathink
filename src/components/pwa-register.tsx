@@ -11,7 +11,7 @@ export function PwaRegister() {
       try {
         await navigator.serviceWorker.register("/sw.js", { scope: "/" })
       } catch {
-        // silent — aplikasi tetap jalan tanpa offline cache
+        // silent: aplikasi tetap jalan tanpa offline cache
       }
     }
 

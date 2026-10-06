@@ -12,7 +12,10 @@ import { BackgroundFX } from "@/components/background-fx"
 import { ArcReactor } from "@/components/arc-reactor"
 import { MobileMenuTrigger } from "@/components/mobile-menu-trigger"
 import { toast } from "sonner"
+import { LoadingScreen } from "@/components/loading-screen"
+import { TutorialTour, TourHelpButton } from "@/components/tutorial-tour"
 import { getRelatedModels } from "@/lib/ar-catalog"
+import { normalizeMathDelimiters } from "@/lib/utils"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 import remarkMath from "remark-math"
@@ -55,6 +58,11 @@ export default function BukuMantraPage() {
           }
           setLoading(false)
         })
+    }).catch(() => {
+      if (!cancelled) {
+        toast.error("Gagal memuat riwayat")
+        setLoading(false)
+      }
     })
     return () => {
       cancelled = true
@@ -66,7 +74,7 @@ export default function BukuMantraPage() {
     if (error) {
       toast.error("Gagal menghapus")
     } else {
-      setHistory(history.filter((h) => h.id !== id))
+      setHistory((h) => h.filter((item) => item.id !== id))
       setConfirmDelete(null)
       toast.success("Mantra dihapus")
     }
@@ -86,22 +94,24 @@ export default function BukuMantraPage() {
             <h1 className="flex items-center gap-2 font-sans text-lg font-bold text-[var(--text-primary)]">
               <ScrollText className="h-5 w-5 text-[var(--accent)]" />
               Buku Mantra
+              <TourHelpButton tour="buku-mantra" />
             </h1>
           </div>
 
           {loading ? (
-            <div className="mt-10 flex justify-center">
-              <ArcReactor size="sm" className="animate-pulse-glow" />
-            </div>
+            <LoadingScreen label="Memuat riwayat…" />
           ) : history.length === 0 ? (
             <div className="mt-10 text-center">
               <BookOpen className="mx-auto h-8 w-8 text-[var(--text-muted)]" />
               <p className="mt-3 text-sm text-[var(--text-secondary)]">
                 Belum ada riwayat. Mulai belajar di Arena!
               </p>
+              <Button variant="outline" size="sm" className="mt-3" onClick={() => { location.href = "/login" }}>
+                Masuk untuk sinkron antar perangkat
+              </Button>
             </div>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-2" data-tour="buku-list">
               {history.map((item) => (
                 <div
                   key={item.id}
@@ -121,7 +131,7 @@ export default function BukuMantraPage() {
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="rounded-md bg-[var(--secondary)] px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-[var(--text-secondary)]">
+                    <span className="rounded-md bg-[var(--secondary)] px-2 py-0.5 text-[11px] text-[var(--text-secondary)]">
                       {item.subject} • {item.level}
                     </span>
                     {confirmDelete === item.id ? (
@@ -164,7 +174,7 @@ export default function BukuMantraPage() {
                   <p className="mt-2 line-clamp-2 text-sm text-[var(--text-primary)]">
                     {item.question}
                   </p>
-                  <p className="mt-1 flex items-center gap-1 font-mono text-[10px] uppercase tracking-wider text-[var(--text-muted)]">
+                  <p className="mt-1 flex items-center gap-1 text-[11px] text-[var(--text-muted)]">
                     <Clock className="h-3 w-3" />
                     {new Date(item.created_at).toLocaleDateString("id-ID")}
                   </p>
@@ -175,19 +185,19 @@ export default function BukuMantraPage() {
         </div>
 
         {/* Detail */}
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className="flex-1 overflow-y-auto p-6" data-tour="buku-detail">
           {selectedItem ? (
             <div className="mx-auto max-w-2xl">
               <div className="mb-6 flex items-center gap-2">
-                <span className="rounded-md bg-[var(--secondary)] px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-[var(--text-secondary)]">
+                <span className="rounded-md bg-[var(--secondary)] px-2 py-0.5 text-[11px] text-[var(--text-secondary)]">
                   {selectedItem.subject} • {selectedItem.level}
                 </span>
-                <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--text-muted)]">
+                <span className="text-xs text-[var(--text-muted)]">
                   {new Date(selectedItem.created_at).toLocaleDateString("id-ID")}
                 </span>
               </div>
               <div className="mb-6">
-                <h3 className="mb-2 font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--text-muted)]">
+                <h3 className="mb-2 text-xs font-semibold text-[var(--text-secondary)]">
                   Soal
                 </h3>
                 <div className="glass rounded-2xl p-5 text-sm text-[var(--text-primary)]">
@@ -195,7 +205,7 @@ export default function BukuMantraPage() {
                 </div>
               </div>
               <div>
-                <h3 className="mb-2 font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--text-muted)]">
+                <h3 className="mb-2 text-xs font-semibold text-[var(--text-secondary)]">
                   Pembahasan
                 </h3>
                 <div className="glass rounded-2xl p-5">
@@ -249,14 +259,14 @@ export default function BukuMantraPage() {
                         },
                       }}
                     >
-                      {selectedItem.answer}
+                      {normalizeMathDelimiters(selectedItem.answer)}
                     </ReactMarkdown>
                   </div>
                 </div>
               </div>
               {getRelatedModels(selectedItem.subject).length > 0 && (
                 <div className="mt-6">
-                  <h3 className="mb-2 font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--text-muted)]">
+                  <h3 className="mb-2 text-xs font-semibold text-[var(--text-secondary)]">
                     Lihat Versi 3D
                   </h3>
                   <div className="flex flex-wrap gap-2">
@@ -284,6 +294,7 @@ export default function BukuMantraPage() {
           )}
         </div>
       </main>
+      <TutorialTour tour="buku-mantra" />
     </div>
   )
 }

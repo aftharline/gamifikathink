@@ -17,6 +17,16 @@ export function BackgroundFX() {
         style={{ animationDelay: "-2s" }}
       />
 
+      {/* Aurora: gradient bergerak sangat subtil (GPU-only) */}
+      <div
+        className="animate-aurora absolute inset-0 opacity-[0.05] dark:opacity-[0.08]"
+        style={{
+          backgroundImage:
+            "linear-gradient(120deg, transparent 20%, rgba(45,212,191,0.5) 40%, transparent 60%, rgba(246,196,83,0.4) 80%, transparent 80%)",
+          backgroundSize: "200% 200%",
+        }}
+      />
+
       {/* Subtle scanline (decorative, very low opacity) */}
       <div className="absolute inset-0 opacity-[0.02] dark:opacity-[0.03]"
         style={{

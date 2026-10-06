@@ -1,4 +1,4 @@
-/* GAMIFIKATHINK Service Worker — offline dasar (app shell) */
+/* GAMIFIKATHINK Service Worker: offline dasar (app shell) */
 const CACHE = "gamifikathink-v2"
 const APP_SHELL = [
   "/",
@@ -7,7 +7,7 @@ const APP_SHELL = [
   "/icons/icon-512.png",
   "/icons/maskable-512.png",
   "/icons/apple-touch-icon.png",
-  "/manifest.webmanifest",
+  // ponytail: /manifest.webmanifest adalah route dinamis, jangan di-precache agar tak basi
 ]
 
 self.addEventListener("install", (event) => {

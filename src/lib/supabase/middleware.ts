@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server"
 
 export function updateSession(request: NextRequest) {
-  // Auth check ditemporarily disabled — siapa pun bisa akses aplikasi
+  // Auth check ditemporarily disabled, siapa pun bisa akses aplikasi
   // Saat auth diaktifkan lagi, panggil Supabase hanya untuk route yang perlu proteksi.
   // if (
   //   !user &&

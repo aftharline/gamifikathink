@@ -33,6 +33,7 @@ export function ArQuiz({ model, onPassed }: ArQuizProps) {
 
   const reset = () => {
     sfx.click()
+    passedRef.current = false
     setQIndex(0)
     setSelected(null)
     setCorrectCount(0)
@@ -41,8 +42,10 @@ export function ArQuiz({ model, onPassed }: ArQuizProps) {
 
   const handleSelect = (idx: number) => {
     if (selected !== null) return
+    const q = questions[qIndex]
+    if (!q) return
     setSelected(idx)
-    if (idx === questions[qIndex].answerIndex) {
+    if (idx === q.answerIndex) {
       sfx.correct()
       setCorrectCount((c) => c + 1)
     } else {
@@ -71,9 +74,9 @@ export function ArQuiz({ model, onPassed }: ArQuizProps) {
 
   return (
     <div className="glass mt-4 rounded-2xl p-4">
-      <p className="mb-3 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--text-muted)]">
+      <p className="mb-3 flex items-center gap-2 text-xs font-semibold text-[var(--text-secondary)]">
         <Brain className="h-3.5 w-3.5 text-[var(--accent)]" />
-        Kuis Model — {total} soal
+        Kuis Model: {total} soal
       </p>
 
       {!started ? (
@@ -94,15 +97,20 @@ export function ArQuiz({ model, onPassed }: ArQuizProps) {
         </div>
       ) : !finished ? (
         <div className="animate-fade-in" key={qIndex}>
-          <p className="font-mono text-[10px] text-[var(--text-muted)]">
-            SOAL {qIndex + 1}/{total} • BENAR {correctCount}
+          <p className="text-[11px] text-[var(--text-muted)]">
+            Soal {qIndex + 1}/{total} • Benar {correctCount}
           </p>
-          <p className="mt-1 text-sm font-semibold text-[var(--text-primary)]">
-            {questions[qIndex].question}
-          </p>
-          <div className="mt-3 space-y-2">
-            {questions[qIndex].options.map((opt, i) => {
-              const isAnswer = i === questions[qIndex].answerIndex
+          {(() => {
+            const q = questions[qIndex]
+            if (!q) return null
+            return (
+              <>
+                <p className="mt-1 text-sm font-semibold text-[var(--text-primary)]">
+                  {q.question}
+                </p>
+                <div className="mt-3 space-y-2">
+                  {q.options.map((opt, i) => {
+                    const isAnswer = i === q.answerIndex
               const isSelected = i === selected
               return (
                 <button
@@ -133,13 +141,16 @@ export function ArQuiz({ model, onPassed }: ArQuizProps) {
           {selected !== null && (
             <div className="animate-fade-in mt-3">
               <p className="rounded-lg bg-white/5 p-3 text-xs leading-relaxed text-[var(--text-secondary)]">
-                {questions[qIndex].explanation}
+                {q.explanation}
               </p>
               <Button size="sm" className="mt-3 w-full" onClick={handleNext}>
                 {qIndex + 1 >= total ? "Lihat Hasil" : "Soal Berikutnya"}
               </Button>
             </div>
           )}
+              </>
+            )
+          })()}
         </div>
       ) : (
         <div className="text-center">
@@ -150,13 +161,13 @@ export function ArQuiz({ model, onPassed }: ArQuizProps) {
                 Sempurna! {correctCount}/{total} benar.
               </p>
               <p className="mt-1 text-xs text-[var(--text-secondary)]">
-                Misi kuis selesai — XP otomatis diklaim.
+                Misi kuis selesai, XP otomatis diklaim.
               </p>
             </>
           ) : (
             <>
               <p className="text-sm font-semibold text-[var(--text-primary)]">
-                {correctCount}/{total} benar — belum sempurna.
+                {correctCount}/{total} benar, belum sempurna.
               </p>
               <p className="mt-1 text-xs text-[var(--text-secondary)]">
                 Ulangi untuk menaklukkan misi kuis dan klaim XP.

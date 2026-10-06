@@ -24,9 +24,15 @@ function getInitialIOS(): boolean {
 export function usePwaInstall() {
   const [deferredPrompt, setDeferredPrompt] =
     useState<BeforeInstallPromptEvent | null>(null)
-  const [isInstalled, setIsInstalled] =
-    useState<boolean>(getInitialInstalled)
-  const [isIOS] = useState<boolean>(getInitialIOS)
+  // Init false agar sama dengan server; deteksi asli di effect (anti hydration mismatch)
+  const [isInstalled, setIsInstalled] = useState<boolean>(false)
+  const [isIOS, setIsIOS] = useState<boolean>(false)
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- sinkronisasi device-ke-state pasca-hydration
+    setIsInstalled(getInitialInstalled())
+    setIsIOS(getInitialIOS())
+  }, [])
 
   useEffect(() => {
     const onBeforeInstall = (e: Event) => {

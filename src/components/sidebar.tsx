@@ -6,6 +6,8 @@ import { useRouter, usePathname } from "next/navigation"
 import {
   BookOpen,
   Boxes,
+  Layers,
+  LogIn,
   LogOut,
   ScrollText,
   Swords,
@@ -14,11 +16,17 @@ import {
   ChevronRight,
   PanelLeftClose,
   PanelLeftOpen,
+  LayoutDashboard,
+  Brain,
+  Trophy,
+  FileText,
+  FlaskConical,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { cn } from "@/lib/utils"
+import { SUBJECTS, LEVELS } from "@/lib/subjects"
 import { createClient } from "@/lib/supabase/client"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { PwaInstallButton } from "@/components/pwa-install-button"
@@ -34,19 +42,6 @@ interface SidebarProps {
   onSelect?: (subject: string, level: string) => void
 }
 
-const SUBJECTS = [
-  { value: "Matematika", label: "🧮 Matematika" },
-  { value: "Bahasa Inggris", label: "📖 Bahasa Inggris" },
-  { value: "Fisika", label: "⚡ Fisika" },
-  { value: "Kimia", label: "🧪 Kimia" },
-]
-
-const LEVELS = [
-  { value: "SD", label: "🏫 SD" },
-  { value: "SMP", label: "📚 SMP" },
-  { value: "SMA", label: "🎓 SMA" },
-]
-
 export function Sidebar({
   userEmail,
   level: currentLevel,
@@ -58,6 +53,8 @@ export function Sidebar({
   const [collapsed, setCollapsed] = useState(false)
   const [xp, setXp] = useState(0)
   const [profileLevel, setProfileLevel] = useState(1)
+  const [sessionName, setSessionName] = useState<string | null>(null)
+  const [loggedIn, setLoggedIn] = useState(false)
   const router = useRouter()
   const pathname = usePathname()
   const [supabase] = useState(() => createClient())
@@ -67,16 +64,27 @@ export function Sidebar({
       try {
         const { data: { user } } = await supabase.auth.getUser()
         if (user) {
+          setLoggedIn(true)
+          setSessionName(
+            user.user_metadata?.full_name ||
+            user.user_metadata?.display_name ||
+            user.email ||
+            "Warrior"
+          )
           const { data } = await supabase
             .from("profiles")
-            .select("xp, level")
+            .select("xp, level, display_name")
             .eq("id", user.id)
             .single()
           if (data?.xp != null) setXp(data.xp)
           if (data?.level != null) setProfileLevel(data.level)
+          if (data?.display_name) setSessionName(data.display_name)
+        } else {
+          setLoggedIn(false)
+          setSessionName(null)
         }
       } catch {
-        // silent
+        // silent (tamu / offline)
       }
     }
     loadProfile()
@@ -104,15 +112,22 @@ export function Sidebar({
   const menuItems = [
     { href: "/arena", label: "Arena Belajar", icon: Swords },
     { href: "/kuis", label: "Boss Battle", icon: Skull },
+    { href: "/kartu", label: "Kartu Mantra", icon: Layers },
+    { href: "/materi", label: "Materi + Podcast", icon: FileText },
+    { href: "/lab", label: "Lab Interaktif", icon: FlaskConical },
+    { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+    { href: "/otak", label: "Brain Games", icon: Brain },
+    { href: "/leaderboard", label: "Leaderboard", icon: Trophy },
     { href: "/buku-mantra", label: "Buku Mantra", icon: ScrollText },
     { href: "/ar", label: "AR Lab", icon: Boxes },
   ]
 
-  const levelLabel = currentLevel || "—"
-  const xpPct = Math.min(
-    100,
-    Math.round((xp / xpNeededForLevel(profileLevel)) * 100)
-  )
+  const levelLabel = currentLevel || "…"
+  const xpNeeded = xpNeededForLevel(profileLevel)
+  const xpPct =
+    Number.isFinite(xp) && xpNeeded > 0
+      ? Math.min(100, Math.round((xp / xpNeeded) * 100))
+      : 0
 
   return (
     <>
@@ -199,14 +214,21 @@ export function Sidebar({
                 <div className="rounded-full bg-gradient-jarvis p-[2px]">
                   <Avatar className="h-9 w-9 bg-[var(--surface-2)]">
                     <AvatarFallback className="bg-[var(--surface-2)] text-xs text-[var(--accent)]">
-                      {userEmail?.charAt(0).toUpperCase() || "U"}
+                      {(sessionName || userEmail || "W").charAt(0).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm text-[var(--text-primary)]">{userEmail || "Warrior"}</p>
-                  <p className="font-mono text-[10px] uppercase tracking-wider text-[var(--text-muted)]">
-                    LV.{profileLevel} • {levelLabel}
+                  <p className="truncate text-sm text-[var(--text-primary)]">
+                    {sessionName || userEmail || "Tamu"}
+                    {!loggedIn && (
+                      <span className="ml-1.5 rounded-md bg-[var(--secondary)] px-1.5 py-0.5 text-[10px] text-[var(--text-muted)]">
+                        Tamu
+                      </span>
+                    )}
+                  </p>
+                  <p className="text-xs text-[var(--text-muted)]">
+                    Level {profileLevel} • {levelLabel}
                   </p>
                   <div className="mt-1.5 flex items-center gap-2">
                     <div className="h-1 flex-1 overflow-hidden rounded-full bg-[var(--secondary)]">
@@ -215,8 +237,8 @@ export function Sidebar({
                         style={{ width: `${xpPct}%` }}
                       />
                     </div>
-                    <span className="font-mono text-[9px] text-[var(--text-muted)]">
-                      {xp}/{xpNeededForLevel(profileLevel)}XP
+                    <span className="text-[11px] text-[var(--text-muted)]">
+                      {xp}/{xpNeededForLevel(profileLevel)} XP
                     </span>
                   </div>
                 </div>
@@ -225,7 +247,7 @@ export function Sidebar({
 
             {/* Navigation */}
             <nav className="flex-1 overflow-y-auto p-3">
-              <p className="mb-2 px-2 font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--text-muted)]">
+              <p className="mb-2 px-2 text-xs font-semibold text-[var(--text-secondary)]">
                 Menu
               </p>
               {menuItems.map((item) => (
@@ -253,8 +275,8 @@ export function Sidebar({
 
               {/* Level & Subject selector */}
               {pathname === "/arena" && onSelect && (
-                <>
-                  <p className="mb-2 px-2 font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--text-muted)]">
+                <div data-tour="subject-picker">
+                  <p className="mb-2 px-2 text-xs font-semibold text-[var(--text-secondary)]">
                     Kelas & Mapel
                   </p>
                   <div className="space-y-1">
@@ -270,7 +292,10 @@ export function Sidebar({
                             : "text-[var(--text-secondary)] hover:bg-white/5 hover:text-[var(--text-primary)]"
                         )}
                       >
-                        {lvl.label}
+                        <span className="flex items-center gap-2">
+                          <lvl.icon className="h-3.5 w-3.5" style={{ color: lvl.color }} />
+                          {lvl.label}
+                        </span>
                         {currentLevel === lvl.value && <ChevronRight className="h-3 w-3" />}
                       </button>
                     ))}
@@ -289,20 +314,23 @@ export function Sidebar({
                             : "text-[var(--text-secondary)] hover:bg-white/5 hover:text-[var(--text-primary)]"
                         )}
                       >
-                        {sub.label}
+                        <span className="flex items-center gap-2">
+                          <sub.icon className="h-3.5 w-3.5" style={{ color: sub.color }} />
+                          {sub.label}
+                        </span>
                         {currentSubject === sub.value && <ChevronRight className="h-3 w-3" />}
                       </button>
                     ))}
                   </div>
 
                   <Separator className="my-4 bg-[var(--border)]" />
-                </>
+                </div>
               )}
 
               {/* Chat history */}
               {chatHistory.length > 0 && (
                 <>
-                  <p className="mb-2 px-2 font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--text-muted)]">
+                  <p className="mb-2 px-2 text-xs font-semibold text-[var(--text-secondary)]">
                     Riwayat
                   </p>
                   {chatHistory.map((chat) => (
@@ -321,20 +349,34 @@ export function Sidebar({
             {/* Footer */}
             <div className="border-t border-[var(--border)] p-3">
               <div className="mb-2 flex items-center justify-between px-2">
-                <span className="font-mono text-[9px] uppercase tracking-wider text-[var(--text-muted)]">
-                  SYS.ONLINE
+                <span className="text-[11px] text-[var(--text-muted)]">
+                  Online
                 </span>
-                <span className="animate-pulse-glow h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
               </div>
               <PwaInstallButton variant="sidebar" className="mb-1" />
-              <Button
-                variant="ghost"
-                className="w-full justify-start gap-3 text-[var(--text-muted)] hover:text-[var(--danger)]"
-                onClick={handleLogout}
-              >
-                <LogOut className="h-4 w-4" />
-                Keluar
-              </Button>
+              {loggedIn ? (
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start gap-3 text-[var(--text-muted)] hover:text-[var(--danger)]"
+                  onClick={handleLogout}
+                >
+                  <LogOut className="h-4 w-4" />
+                  Keluar
+                </Button>
+              ) : (
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start gap-3 text-[var(--accent)]"
+                  onClick={() => {
+                    router.push("/login")
+                    setOpen(false)
+                  }}
+                >
+                  <LogIn className="h-4 w-4" />
+                  Masuk / Daftar
+                </Button>
+              )}
             </div>
           </>
         )}
@@ -358,13 +400,23 @@ export function Sidebar({
             ))}
             <ThemeToggle className="mt-2" />
             <PwaInstallButton variant="icon" />
-            <button
-              onClick={handleLogout}
-              title="Keluar"
-              className="mt-auto flex h-10 w-10 items-center justify-center rounded-xl text-[var(--text-muted)] hover:bg-red-500/10 hover:text-[var(--danger)]"
-            >
-              <LogOut className="h-4 w-4" />
-            </button>
+            {loggedIn ? (
+              <button
+                onClick={handleLogout}
+                title="Keluar"
+                className="mt-auto flex h-10 w-10 items-center justify-center rounded-xl text-[var(--text-muted)] hover:bg-red-500/10 hover:text-[var(--danger)]"
+              >
+                <LogOut className="h-4 w-4" />
+              </button>
+            ) : (
+              <button
+                onClick={() => router.push("/login")}
+                title="Masuk / Daftar"
+                className="mt-auto flex h-10 w-10 items-center justify-center rounded-xl text-[var(--accent)] hover:bg-white/5"
+              >
+                <LogIn className="h-4 w-4" />
+              </button>
+            )}
           </div>
         )}
       </aside>

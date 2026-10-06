@@ -1,35 +1,35 @@
-# DESIGNREFACTOR.md — Interface Redesign "JARVIS STYLE"
+# DESIGNREFACTOR.md: Interface Redesign "JARVIS STYLE"
 
-> Refactor besar tampilan GAMIFIKATHINK dari tema gaming gelap biasa menjadi **holographic AI interface ala JARVIS (Iron Man)** — premium, futuristic, glassy, dan responsif.
+> Refactor besar tampilan GAMIFIKATHINK dari tema gaming gelap biasa menjadi **holographic AI interface ala JARVIS (Iron Man)**: premium, futuristic, glassy, dan responsif.
 
 ---
 
 ## 1. Vision & Aesthetic
 
 ### 1.1 Konsep Utama
-- **Look & feel:** HUD canggih JARVIS di dalam Iron Man suit — gelap, glassy, neon cyan, holographic.
+- **Look & feel:** HUD canggih JARVIS di dalam Iron Man suit: gelap, glassy, neon cyan, holographic.
 - **Mood:** "Kamu sedang berada di dalam AI cockpít yang hidup."
 - **Efek khas:** glassmorphism, glow neon, grid futuristik, scanline halus, partikel, animasi transisi halus.
 - **Tetap edukatif:** elemen game (level, XP, hero) dipertahankan sebagai bagian HUD.
 
 ### 1.2 Pilar Desain (4 P)
-1. **Premium** — spacing konsisten, micro-interaction halus, tidak ada elemen "mentah".
-2. **Glassy** — panel transparan dengan `backdrop-blur`, border tipis, shadow lembut.
-3. **Glowing** — aksen neon cyan sebagai signature color, bukan sekadar warna indigo polos.
-4. **Layered** — hierarki jelas: background → surface → elevated (modals) → overlay.
+1. **Premium**: spacing konsisten, micro-interaction halus, tidak ada elemen "mentah".
+2. **Glassy**: panel transparan dengan `backdrop-blur`, border tipis, shadow lembut.
+3. **Glowing**: aksen neon cyan sebagai signature color, bukan sekadar warna indigo polos.
+4. **Layered**: hierarki jelas: background → surface → elevated (modals) → overlay.
 
 ---
 
 ## 2. Color System (Dark & Light Mode)
 
-### 2.1 Dark Mode (Default — "JARVIS Night")
+### 2.1 Dark Mode (Default: "JARVIS Night")
 | Token | Hex | Penggunaan |
 |---|---|---|
 | `--background` | `#05060a` | Latar utama (hampir hitam kebiruan) |
 | `--surface` | `#0b0e15 / 60%` | Panel glass (dengan blur) |
 | `--surface-2` | `#111522 / 70%` | Card, sidebar |
 | `--border` | `rgba(56, 189, 248, 0.15)` | Border glass, subtle glow |
-| `--accent` | `#22d3ee` (cyan-400) | Warna utama JARVIS — tombol, link, LED |
+| `--accent` | `#22d3ee` (cyan-400) | Warna utama JARVIS: tombol, link, LED |
 | `--accent-2` | `#818cf8` (indigo-400) | Sekunder, gradient partner |
 | `--text-primary` | `#e8edf4` | Teks utama |
 | `--text-secondary` | `#8b95a7` | Teks sekunder |
@@ -38,7 +38,7 @@
 | `--warning` | `#fbbf24` | LED fallback engine |
 | `--danger` | `#f87171` | Error, delete |
 
-**Gradient signature:** `linear-gradient(135deg, #22d3ee 0%, #6366f1 100%)` — dipakai di tombol utama, logo, progress bar.
+**Gradient signature:** `linear-gradient(135deg, #22d3ee 0%, #6366f1 100%)`, dipakai di tombol utama, logo, progress bar.
 
 ### 2.2 Light Mode ("JARVIS Day")
 | Token | Hex | Penggunaan |
@@ -53,14 +53,14 @@
 | `--text-secondary` | `#475569` | Teks sekunder |
 | `--text-muted` | `#94a3b8` | Placeholder |
 
-> **Aturan:** semua komponen WAJIB membaca CSS variables — tidak boleh ada warna hex hardcoded di komponen (kecuali gradient signature yang sama untuk kedua mode).
+> **Aturan:** semua komponen WAJIB membaca CSS variables, tidak boleh ada warna hex hardcoded di komponen (kecuali gradient signature yang sama untuk kedua mode).
 
 ---
 
 ## 3. Typography
 
 - **Sans (utama):** `Space Grotesk` untuk heading (futuristik, karakter game-tech), `Inter` untuk body (legibility). *(Ganti font Google di `layout.tsx`)*
-- **Mono (kode & rumus):** `JetBrains Mono` — tetap dipakai untuk `code`, `pre`, angka statistik, dan label teknis.
+- **Mono (kode & rumus):** `JetBrains Mono`, tetap dipakai untuk `code`, `pre`, angka statistik, dan label teknis.
 - **Skala:**
   - Hero / Landing title: `text-5xl md:text-7xl font-bold tracking-tight`
   - Halaman title: `text-2xl font-semibold`
@@ -110,7 +110,7 @@
 3. **Glow orbs** (blob blur besar di pojok, subtle, animated pulse 8s infinite):
    - kiri-atas: cyan `blur-3xl opacity-20`
    - kanan-bawah: indigo `blur-3xl opacity-20`
-4. **Scanline** opsional (subtle, 6px stripe bergerak vertikal, opacity 0.03) — default OFF, toggle di settings.
+4. **Scanline** opsional (subtle, 6px stripe bergerak vertikal, opacity 0.03), default OFF, toggle di settings.
 
 ### 4.4 Radius & Spacing
 - Radius konsisten: `rounded-xl` (card), `rounded-2xl` (panel besar), `rounded-full` (pills/LED).
@@ -128,14 +128,14 @@
 - **Nav items:** active state = pill glass + glow kiri (`border-l-2 border-cyan-400`) + icon menyala; hover = `bg-white/5`.
 - **Selector kelas/mapel:** chip glass dengan icon; active = ring cyan + glow.
 - **Riwayat:** item dengan hover reveal delete icon.
-- **Collapse:** di desktop bisa collapse ke `w-16` (icon-only) — tombol di header sidebar.
+- **Collapse:** di desktop bisa collapse ke `w-16` (icon-only), tombol di header sidebar.
 - **Mobile:** drawer full-width `w-[85vw] max-w-sm` dengan overlay blur `backdrop-blur-sm bg-black/40`.
 
 ### 5.2 Chat Interface
 - **Header chat:** sticky, `glass`, judul mapel dengan icon glow; kanan: **engine LED + live status** (`PING 42ms` ala HUD, update real-time), tombol "+ Baru".
 - **Bubble user:** `bg-gradient-to-r from-cyan-500/20 to-indigo-500/20`, border cyan/30, align kanan.
 - **Bubble AI:** `glass-strong`, border `--border`, rounded `rounded-2xl rounded-tl-md`.
-- **LED indicator per bubble AI:** dot pulsing (animate-pulse) — cyan = primary, amber = fallback. Label kecil mono: `GEMMI-2.5.FLASH` / `GPT-3.5`.
+- **LED indicator per bubble AI:** dot pulsing (animate-pulse), cyan = primary, amber = fallback. Label kecil mono: `GEMMI-2.5.FLASH` / `GPT-3.5`.
 - **Streaming animation:** cursor khas JARVIS `▍` berkedip saat AI mengetik; bubble AI muncul dengan fade+slide-in `animate-fade-up`.
 - **Empty state (belum ada chat):** logo arc reactor besar dengan pulse glow + teks instruksi + 3 saran soal cepat (quick chips).
 - **Typing indicator:** 3 titik cyan yang memantul di bubble AI saat loading awal.
@@ -160,7 +160,7 @@
 - Full-screen, background grid + orbs + partikel (CSS-only, tanpa library).
 - **Arc Reactor logo** di tengah atas: lingkaran concentric dengan gradient cyan → outer ring berputar (`animation: spin 12s linear infinite`).
 - **Title:** gradient text, `text-6xl md:text-8xl`, dengan glitch/shimmer subtle (CSS keyframes, tidak perlu library).
-- **Status bar HUD:** di pojok bawah — `SYS.ONLINE // ENGINES: DUAL // MODEL: GEMINI-2.5-FLASH` mono micro, blinking cursor.
+- **Status bar HUD:** di pojok bawah, `SYS.ONLINE // ENGINES: DUAL // MODEL: GEMINI-2.5-FLASH` mono micro, blinking cursor.
 - **Feature cards:** glass dengan icon glow, hover translate-y-[-4px] + glow.
 
 ### 5.6 Buku Mantra (History)
@@ -241,7 +241,7 @@
 ## 8. Theme System (Dark/Light Toggle)
 
 ### 8.1 Setup
-- Sudah pakai `next-themes` (di `providers.tsx`) — **ubah** dari `forcedTheme="dark"` menjadi **unforced**:
+- Sudah pakai `next-themes` (di `providers.tsx`), **ubah** dari `forcedTheme="dark"` menjadi **unforced**:
   ```tsx
   <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
   ```

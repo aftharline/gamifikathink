@@ -7,12 +7,12 @@ import remarkMath from "remark-math"
 import rehypeKatex from "rehype-katex"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { EngineLED } from "@/components/engine-led"
-import { cn } from "@/lib/utils"
+import { cn, normalizeMathDelimiters } from "@/lib/utils"
 
 interface ChatMessageProps {
   role: "user" | "assistant"
   content: string
-  engine?: "primary" | "fallback" | null
+  engine?: "gemini" | "chatanywhere" | null
   streaming?: boolean
 }
 
@@ -102,7 +102,7 @@ export function ChatMessage({ role, content, engine, streaming }: ChatMessagePro
                 },
               }}
             >
-              {content}
+              {normalizeMathDelimiters(content)}
             </ReactMarkdown>
           </div>
           {streaming && (

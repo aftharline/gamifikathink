@@ -11,6 +11,7 @@ import { MobileMenuTrigger } from "@/components/mobile-menu-trigger"
 import { AR_MODELS, AR_SUBJECTS } from "@/lib/ar-catalog"
 import { sfx } from "@/lib/feedback"
 import { cn } from "@/lib/utils"
+import { TutorialTour, TourHelpButton } from "@/components/tutorial-tour"
 
 export default function ArLabPage() {
   const [subject, setSubject] = useState<string>("Semua")
@@ -32,15 +33,16 @@ export default function ArLabPage() {
           <h1 className="flex items-center gap-3 font-sans text-2xl font-bold text-[var(--text-primary)] sm:text-3xl">
             <Boxes className="h-7 w-7 text-[var(--accent)]" />
             AR LAB
+            <TourHelpButton tour="ar" />
           </h1>
           <p className="mt-2 max-w-2xl text-sm text-[var(--text-secondary)]">
             Putar objek 3D langsung di sini, ketuk titik bernomor untuk
             penjelasannya, lalu tekan <strong>Lihat di AR</strong> untuk
             menempatkan model asli di mejamu. Interaksi hotspot & kuis ada di
-            mode 3D — mode AR hanya menampilkan model.
+            mode 3D, sedangkan mode AR hanya menampilkan model.
           </p>
 
-          <div className="mt-6 flex flex-wrap gap-2">
+          <div className="mt-6 flex flex-wrap gap-2" data-tour="ar-filter">
             {["Semua", ...AR_SUBJECTS].map((s) => (
               <button
                 key={s}
@@ -60,7 +62,7 @@ export default function ArLabPage() {
             ))}
           </div>
 
-          <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3" data-tour="ar-grid">
             {filtered.map((m) => (
               <ArModelCard key={m.id} model={m} />
             ))}
@@ -73,6 +75,7 @@ export default function ArLabPage() {
           )}
         </div>
       </main>
+      <TutorialTour tour="ar" />
     </div>
   )
 }

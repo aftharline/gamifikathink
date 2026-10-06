@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next"
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "GAMIFIKATHINK — Belajar Jadi Game",
+    name: "GAMIFIKATHINK: Belajar Jadi Game",
     short_name: "GAMIFIKATHINK",
     description: "Ubah soal pelajaran jadi skenario game epik dengan AI",
     lang: "id",

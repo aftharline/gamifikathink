@@ -16,7 +16,7 @@ export interface ArQuizItem {
 export interface ArModelLicense {
   author: string
   name: string
-  /** Opsional — dikosongkan untuk aset milik sendiri (tautan sumber disembunyikan). */
+  /** Opsional: dikosongkan untuk aset milik sendiri (tautan sumber disembunyikan). */
   url?: string
 }
 
@@ -61,18 +61,18 @@ export const AR_MODELS: ArModel[] = [
     poster: "/models/kubus-prisma/poster-v2.png",
     license: {
       author: "Aset pribadi GamifikaThink",
-      name: "Milik internal — bukan untuk distribusi ulang",
+      name: "Milik internal, bukan untuk distribusi ulang",
     },
     animations: ["Animation"],
     hotspots: [
-      // Badan rubik statis di tengah (0.08, 1.16, 6.42), sisi 2.24 —
+      // Badan rubik statis di tengah (0.08, 1.16, 6.42), sisi 2.24:
       // panel kuning yang beterbangan diabaikan. Terverifikasi screenshot.
       {
         id: "sisi",
         position: "0.08 1.16 7.57",
         normal: "0 0 1",
         title: "Sisi",
-        body: "Sisi depan rubik ini berisi 9 facelet merah 3×3. Kubus punya 6 sisi — hafalkan polanya!",
+        body: "Sisi depan rubik ini berisi 9 facelet merah 3×3. Kubus punya 6 sisi, hafalkan polanya!",
       },
       {
         id: "rusuk",
@@ -116,11 +116,11 @@ export const AR_MODELS: ArModel[] = [
     poster: "/models/grammar-dragon/poster-v2.png",
     license: {
       author: "Aset pribadi GamifikaThink",
-      name: "Milik internal — bukan untuk distribusi ulang",
+      name: "Milik internal, bukan untuk distribusi ulang",
     },
     animations: ["Take 001"],
     // Model diskala ×0.001 + diangkat agar pas AR; hotspot diposisikan di
-    // pose diam (autoplay mati default — lihat bawah) karena animasinya
+    // pose diam (autoplay mati default, lihat bawah) karena animasinya
     // menggerakkan seluruh badan. Jangkar WAJIB di udara luar permukaan:
     // model-viewer menyembunyikan hotspot yang tertanam di dalam mesh.
     // Terverifikasi screenshot per label.
@@ -131,21 +131,21 @@ export const AR_MODELS: ArModel[] = [
         position: "0.1 1.57 1.15",
         normal: "0 0 1",
         title: "Kepala (Head)",
-        body: "Vocab: head — kepala. Moncongnya menghadap ke depan, siap menyemburkan grammar fire.",
+        body: "Vocab: head (kepala). Moncongnya menghadap ke depan, siap menyemburkan grammar fire.",
       },
       {
         id: "badan",
         position: "0 1.6 1.2",
         normal: "0 0 1",
         title: "Badan (Body)",
-        body: "Vocab: body — badan. Punggungnya kokoh menopang sepasang sayap raksasa.",
+        body: "Vocab: body (badan). Punggungnya kokoh menopang sepasang sayap raksasa.",
       },
       {
         id: "sayap",
         position: "0.9 1.63 0.3",
         normal: "0.3 0.2 1",
         title: "Sayap (Wing)",
-        body: "Vocab: wing — sayap. Bentangannya hampir 2 meter — cocok untuk serangan udara.",
+        body: "Vocab: wing (sayap). Bentangannya hampir 2 meter, cocok untuk serangan udara.",
       },
     ],
     quiz: [
@@ -330,7 +330,7 @@ export const AR_MODELS: ArModel[] = [
           "Bahan tali & massa beban",
         ],
         answerIndex: 1,
-        explanation: "Periode T = 2π√(l/g) — hanya dipengaruhi oleh panjang tali (l) dan gravitasi (g).",
+        explanation: "Periode T = 2π√(l/g), hanya dipengaruhi oleh panjang tali (l) dan gravitasi (g).",
       },
       {
         question: "Satu getaran penuh pada bandul adalah gerakan…",
@@ -365,21 +365,21 @@ export const AR_MODELS: ArModel[] = [
         position: "0 1.2 0",
         normal: "0 1 0",
         title: "Keep / Main Tower",
-        body: "Vocab: Keep — Menara utama benteng yang paling kokoh dan menjadi tempat perlindungan terakhir.",
+        body: "Vocab: Keep (menara utama). Menara utama benteng yang paling kokoh dan menjadi tempat perlindungan terakhir.",
       },
       {
         id: "corner-tower",
         position: "0.6 1.6 0.6",
         normal: "1 1 1",
         title: "Turret / Watchtower",
-        body: "Vocab: Turret — Menara pengawas di sudut benteng untuk memantau kedatangan musuh.",
+        body: "Vocab: Turret (menara pengawas). Menara pengawas di sudut benteng untuk memantau kedatangan musuh.",
       },
       {
         id: "gatehouse",
         position: "0 0.25 0.55",
         normal: "0 0 1",
         title: "Gatehouse / Main Gate",
-        body: "Vocab: Gatehouse — Gerbang masuk utama kastil yang dilengkapi jembatan angkat.",
+        body: "Vocab: Gatehouse (gerbang masuk). Gerbang masuk utama kastil yang dilengkapi jembatan angkat.",
       },
     ],
     quiz: [
@@ -406,7 +406,7 @@ export const AR_MODELS: ArModel[] = [
   {
     id: "ryuri",
     subject: "Special",
-    title: "Ryuri — Spirit Companion",
+    title: "Ryuri: Spirit Companion",
     description:
       "Karakter pendamping magis Ryuri. Jelajahi 4 pose animasi interaktifnya ('Idle', 'Idle_Static', 'Run', 'T_Pose'), lalu tempatkan ia di sisimu lewat AR.",
     glb: "/models/ryuri/model-v2.glb",
@@ -414,7 +414,7 @@ export const AR_MODELS: ArModel[] = [
     poster: "/models/ryuri/poster-v2.svg",
     license: {
       author: "Aset pribadi GamifikaThink",
-      name: "Milik internal — Special Release",
+      name: "Milik internal: Special Release",
     },
     animations: ["Idle", "Idle_Static", "Run", "T_Pose"],
     deferLoad: true,

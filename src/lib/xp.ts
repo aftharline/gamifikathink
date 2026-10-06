@@ -2,6 +2,8 @@ export const XP_REWARDS = {
   chatCompleted: 10,
   quizCorrect: 15,
   bossDefeated: 25,
+  flashCorrect: 8,
+  flashDeckClear: 15,
 } as const
 
 export function xpNeededForLevel(level: number): number {

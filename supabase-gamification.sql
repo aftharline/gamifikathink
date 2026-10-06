@@ -1,5 +1,5 @@
 -- ============================================================
--- GAMIFIKATHINK — Gamification (XP & Level)
+-- GAMIFIKATHINK: Gamification (XP & Level)
 -- Jalankan section ini di Supabase Dashboard > SQL Editor
 -- (setelah menjalankan supabase-schema.sql)
 -- ============================================================
@@ -16,7 +16,7 @@ DECLARE
   current_level INTEGER;
   old_level INTEGER;
 BEGIN
-  SELECT p.xp, p.level INTO current_xp, current_level
+  SELECT COALESCE(p.xp, 0), COALESCE(p.level, 1) INTO current_xp, current_level
   FROM public.profiles p
   WHERE p.id = auth.uid();
 

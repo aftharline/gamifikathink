@@ -32,9 +32,27 @@ export const BOSSES: Record<string, Boss> = {
     title: "Alkemis Reaksi",
     quote: "Campuran tepat menciptakan ledakan. Awas salah reaksi!",
   },
+  Biologi: {
+    name: "Mother Spore",
+    title: "Ratu Sel Hidup",
+    quote: "Setiap sel adalah pasukanku. Taklukkan ekosistemku jika berani!",
+  },
+  "Bahasa Indonesia": {
+    name: "Raja Kata",
+    title: "Penjaga Bahasa",
+    quote: "Satu kata salah, misimu gagal. Buktikan tajam bahasamu!",
+  },
+  Ekonomi: { name: "Lord Pasar", title: "Penguasa Modal", quote: "Supply-demand menentukan nasibmu!" },
+  Geografi: { name: "Titan Bumi", title: "Penjaga Peta", quote: "Kenali bumimu sebelum menaklukkannya!" },
+  Sejarah: { name: "Kaisar Waktu", title: "Penjaga Masa", quote: "Yang lupa sejarah akan mengulanginya!" },
+  Sosiologi: { name: "Oracle Sosial", title: "Pemandu Masyarakat", quote: "Pahami manusia, kuasai dunia!" },
+  PPKn: { name: "Garuda Sakti", title: "Penjaga Konstitusi", quote: "Pancasila adalah senjatamu!" },
+  IPA: { name: "Dr. Sains", title: "Penjelajah Alam", quote: "Eksperimen atau punah!" },
+  IPS: { name: "Penjelajah Dunia", title: "Petualang Sosial", quote: "Dunia menunggumu!" },
+  Informatika: { name: "Cyber Lord", title: "Penguasa Kode", quote: "Bug adalah musuhmu. Debug sekarang!" },
 }
 
-const BANK: Record<string, QuizQuestion[]> = {
+export const BANK: Record<string, QuizQuestion[]> = {
   Matematika: [
     {
       question: "Berapakah nilai x jika 2x + 5 = 15?",
@@ -218,12 +236,115 @@ const BANK: Record<string, QuizQuestion[]> = {
       explanation: "Emas (aurum) memiliki simbol Au.",
     },
   ],
+  Biologi: [
+    {
+      question: "Tempat berlangsungnya fotosintesis pada tumbuhan adalah…",
+      options: ["mitokondria", "kloroplas", "nukleus", "ribosom"],
+      answerIndex: 1,
+      explanation: "Fotosintesis terjadi di kloroplas yang mengandung klorofil.",
+    },
+    {
+      question: "Pembuluh darah yang membawa darah kaya oksigen dari jantung adalah…",
+      options: ["vena", "aorta", "kapiler", "arteri pulmonalis"],
+      answerIndex: 1,
+      explanation: "Aorta adalah arteri terbesar yang mengalirkan darah kaya oksigen ke tubuh.",
+    },
+    {
+      question: "Proses pembelahan sel untuk pertumbuhan tubuh disebut…",
+      options: ["meiosis", "mitosis", "fertilisasi", "difusi"],
+      answerIndex: 1,
+      explanation: "Mitosis menghasilkan sel anak identik untuk pertumbuhan dan perbaikan.",
+    },
+    {
+      question: "Organ manusia yang berfungsi memompa darah adalah…",
+      options: ["hati", "paru-paru", "jantung", "ginjal"],
+      answerIndex: 2,
+      explanation: "Jantung memompa darah ke seluruh tubuh lewat pembuluh darah.",
+    },
+    {
+      question: "Makhluk hidup yang mampu membuat makanannya sendiri disebut…",
+      options: ["konsumen", "dekomposer", "produsen", "predator"],
+      answerIndex: 2,
+      explanation: "Produsen (tumbuhan) berfotosintesis dan jadi sumber energi ekosistem.",
+    },
+    {
+      question: "Bagian sel yang mengatur seluruh aktivitas sel adalah…",
+      options: ["membran sel", "sitoplasma", "nukleus", "dinding sel"],
+      answerIndex: 2,
+      explanation: "Nukleus (inti sel) menyimpan materi genetik dan mengatur aktivitas sel.",
+    },
+  ],
+  "Bahasa Indonesia": [
+    {
+      question: "Kalimat berikut yang menggunakan imbuhan me- dengan benar adalah…",
+      options: [
+        "Dia memfoto pemandangan itu",
+        "Dia menfoto pemandangan itu",
+        "Dia memoto pemandangan itu",
+        "Dia foto pemandangan itu",
+      ],
+      answerIndex: 1,
+      explanation: "Kata 'foto' diawali f, imbuhan me- luluh menjadi 'menfoto'.",
+    },
+    {
+      question: "Kata yang termasuk kata kerja (verba) adalah…",
+      options: ["cantik", "berlari", "sangat", "dan"],
+      answerIndex: 1,
+      explanation: "'Berlari' menyatakan tindakan, jadi termasuk verba.",
+    },
+    {
+      question: "Gagasan utama sebuah paragraf disebut…",
+      options: ["kesimpulan", "ide pokok", "argumen", "amanat"],
+      answerIndex: 1,
+      explanation: "Ide pokok adalah gagasan utama yang dijelaskan kalimat penjelas.",
+    },
+    {
+      question: "'Bunga desa' pada kalimat 'Ia adalah bunga desa' termasuk majas…",
+      options: ["personifikasi", "metafora", "hiperbola", "ironi"],
+      answerIndex: 1,
+      explanation: "Metafora membandingkan tanpa kata 'seperti': gadis cantik = bunga desa.",
+    },
+    {
+      question: "Teks yang bertujuan meyakinkan pembaca disebut teks…",
+      options: ["narasi", "deskripsi", "persuasi", "prosedur"],
+      answerIndex: 2,
+      explanation: "Teks persuasi berisi ajakan dan alasan untuk meyakinkan pembaca.",
+    },
+    {
+      question: "Lawan kata (antonim) dari 'rajin' adalah…",
+      options: ["pintar", "malas", "cepat", "kuat"],
+      answerIndex: 1,
+      explanation: "Antonim rajin adalah malas.",
+    },
+  ],
 }
 
 export function getFallbackQuestions(subject: string): QuizQuestion[] {
   const pool = BANK[subject] ?? BANK["Matematika"]
   const shuffled = [...pool].sort(() => Math.random() - 0.5)
   return shuffled.slice(0, 5)
+}
+
+/** Validasi soal dari API sebelum dirender (cegah crash/OOB) */
+export function isValidQuizQuestion(q: unknown): q is QuizQuestion {
+  if (typeof q !== "object" || q === null) return false
+  const c = q as {
+    question?: unknown
+    options?: unknown
+    answerIndex?: unknown
+    explanation?: unknown
+  }
+  return (
+    typeof c.question === "string" &&
+    c.question.length > 0 &&
+    Array.isArray(c.options) &&
+    c.options.length === 4 &&
+    c.options.every((o) => typeof o === "string") &&
+    Number.isInteger(c.answerIndex) &&
+    (c.answerIndex as number) >= 0 &&
+    (c.answerIndex as number) < 4 &&
+    typeof c.explanation === "string"
+  )
 }
 
 export function shuffleQuestions(questions: QuizQuestion[]): QuizQuestion[] {

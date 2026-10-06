@@ -2,7 +2,7 @@
   "semi": false,
   "singleQuote": false,
   "tabWidth": 2,
-  "trailingComma": "esModule",
+  "trailingComma": "es5",
   "printWidth": 100,
   "plugins": []
 }

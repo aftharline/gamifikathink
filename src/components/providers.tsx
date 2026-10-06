@@ -3,6 +3,7 @@
 import { ThemeProvider } from "next-themes"
 import { Toaster } from "sonner"
 import { PwaRegister } from "@/components/pwa-register"
+import { LoginGateModal } from "@/components/login-gate-modal"
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
@@ -14,6 +15,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
     >
       {children}
       <PwaRegister />
+      <LoginGateModal />
       <Toaster
         position="bottom-right"
         toastOptions={{

@@ -65,7 +65,8 @@ export function ArViewer({
     model.animations?.[0] ?? ""
   )
   const [playing, setPlaying] = useState<boolean>(model.autoplay ?? true)
-  const [autoRotate, setAutoRotate] = useState<boolean>(getInitialAutoRotate)
+  // Init true (= server); hormati prefers-reduced-motion setelah hydration
+  const [autoRotate, setAutoRotate] = useState<boolean>(true)
   const [activeHotspot, setActiveHotspot] = useState<string | null>(null)
   const [visited, setVisited] = useState<string[]>([])
   const deferLoad = model.deferLoad ?? false
@@ -75,6 +76,8 @@ export function ArViewer({
   // Catatan: import dinamis yang gagal (chunk JS tidak terunduh) dibedakan
   // dari model .glb yang gagal dimuat, agar diagnosis terlihat di UI.
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- sinkronisasi preferensi-motion pasca-hydration
+    setAutoRotate(getInitialAutoRotate())
     let cancelled = false
     import("@google/model-viewer")
       .then(() => {
@@ -116,13 +119,13 @@ export function ArViewer({
       if (status === "session-started" && !arStartedRef.current) {
         arStartedRef.current = true
         sfx.win()
-        toast.success("Mode AR aktif — gerakkan HP perlahan memindai permukaan")
+        toast.success("Mode AR aktif, gerakkan HP perlahan memindai permukaan")
         onArSessionStarted?.()
       }
       if (status === "failed") {
         setArFailed(true)
         toast.error(
-          "AR tidak didukung di perangkat ini — mode 3D tetap bisa dipakai"
+          "AR tidak didukung di perangkat ini, mode 3D tetap bisa dipakai"
         )
       }
     }
@@ -310,7 +313,7 @@ export function ArViewer({
 
         {arFailed && (
           <p className="absolute inset-x-0 bottom-16 mx-auto w-fit rounded-lg bg-black/70 px-3 py-1.5 font-mono text-[11px] text-amber-200">
-            Native AR tidak tersedia — gunakan tombol Kamera AR Web di atas
+            Native AR tidak tersedia, gunakan tombol Kamera AR Web di atas
           </p>
         )}
       </div>
@@ -390,7 +393,7 @@ export function ArViewer({
         ) : (
           <p className="text-sm text-[var(--text-muted)]">
             Ketuk titik bernomor pada model untuk melihat penjelasannya.
-            Interaksi hotspot & kuis ada di mode 3D ini — tombol{" "}
+            Interaksi hotspot & kuis ada di mode 3D ini. Tombol{" "}
             <strong>Lihat di AR</strong> untuk menempatkan model asli di
             mejamu.
           </p>

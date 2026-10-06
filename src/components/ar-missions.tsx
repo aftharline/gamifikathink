@@ -7,8 +7,8 @@ import type { ArMission } from "@/hooks/use-ar-missions"
 export function ArMissions({ missions }: { missions: ArMission[] }) {
   return (
     <div className="glass mt-4 rounded-2xl p-4">
-      <p className="mb-3 font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--text-muted)]">
-        Misi AR — klaim XP 1x sehari
+      <p className="mb-3 text-xs font-semibold text-[var(--text-secondary)]">
+        Misi AR: klaim XP 1x sehari
       </p>
       <div className="space-y-2">
         {missions.map((m) => (
@@ -33,11 +33,11 @@ export function ArMissions({ missions }: { missions: ArMission[] }) {
               </p>
             </div>
             {m.done ? (
-              <span className="shrink-0 rounded-md bg-emerald-500/15 px-2 py-0.5 font-mono text-[10px] font-bold text-emerald-300">
+              <span className="shrink-0 rounded-md bg-emerald-500/15 px-2 py-0.5 text-[11px] font-bold text-emerald-300">
                 Selesai
               </span>
             ) : (
-              <span className="shrink-0 rounded-md bg-[var(--secondary)] px-2 py-0.5 font-mono text-[10px] font-bold text-[var(--accent)]">
+              <span className="shrink-0 rounded-md bg-[var(--secondary)] px-2 py-0.5 text-[11px] font-bold text-[var(--accent)]">
                 +{m.xp} XP
               </span>
             )}

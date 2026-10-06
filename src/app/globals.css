@@ -93,7 +93,7 @@
   --color-cyan-jarvis: var(--accent);
   --color-indigo-jarvis: var(--accent-2);
   --color-gold-jarvis: var(--gold);
-  --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", ui-monospace, monospace;
 }
 
@@ -119,8 +119,8 @@ h1, h2, h3, h4, h5, h6 {
 /* ============ JARVIS UTILITIES ============ */
 .glass {
   background: var(--surface);
-  backdrop-filter: blur(12px) saturate(140%);
-  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
   border: 1px solid var(--border);
 }
 
@@ -164,6 +164,15 @@ h1, h2, h3, h4, h5, h6 {
   background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
 }
 
+/* Serif/latin accent untuk kata penekanan ("Warrior", "Game Master").
+   Stack di-hardcode (tanpa var) agar tak bergantung resolusi variabel tema. */
+.font-display {
+  font-family: "Instrument Serif", "Instrument Serif Fallback", Georgia, "Times New Roman", serif;
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+}
+
 /* Futuristic grid background */
 .bg-grid {
   background-image:
@@ -205,6 +214,18 @@ h1, h2, h3, h4, h5, h6 {
   0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
   30% { transform: translateY(-4px); opacity: 1; }
 }
+@keyframes rise-in {
+  from { opacity: 0; transform: translateY(12px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes aurora {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+@keyframes border-glow {
+  0%, 100% { box-shadow: 0 0 12px rgba(246, 196, 83, 0.25), inset 0 0 8px rgba(246, 196, 83, 0.08); }
+  50% { box-shadow: 0 0 24px rgba(246, 196, 83, 0.5), inset 0 0 12px rgba(246, 196, 83, 0.15); }
+}
 
 .animate-fade-up { animation: fade-up 0.3s ease-out both; }
 .animate-fade-in { animation: fade-in 0.2s ease-out both; }
@@ -214,6 +235,30 @@ h1, h2, h3, h4, h5, h6 {
 .animate-blink-cursor { animation: blink-cursor 1s steps(1) infinite; }
 .animate-float-orb { animation: float-orb 8s ease-in-out infinite; }
 .animate-typing-dot { animation: typing-dot 1.2s ease-in-out infinite; }
+.animate-rise-in { animation: rise-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.animate-border-glow { animation: border-glow 1.4s ease-in-out infinite; }
+.animate-aurora { animation: aurora 18s ease-in-out infinite; }
+
+/* Stagger entrance (delay bertingkat untuk grid kartu) */
+.stagger-1 { animation-delay: 0.06s; }
+.stagger-2 { animation-delay: 0.12s; }
+.stagger-3 { animation-delay: 0.18s; }
+.stagger-4 { animation-delay: 0.24s; }
+.stagger-5 { animation-delay: 0.3s; }
+
+/* Interaksi halus: hover lift + active press (transform/opacity only) */
+.lift {
+  transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.2s ease, border-color 0.2s ease, filter 0.2s ease;
+}
+.lift:hover {
+  transform: translateY(-2px);
+}
+.press {
+  transition: transform 0.12s ease;
+}
+.press:active {
+  transform: scale(0.97);
+}
 
 /* ============ SCROLLBAR ============ */
 ::-webkit-scrollbar {
@@ -315,6 +360,187 @@ input[type="range"].range-jarvis::-moz-range-track {
   height: 6px;
   border-radius: 9999px;
   background: transparent;
+}
+
+/* ============ LAB FX KEYFRAMES ============ */
+@keyframes fx-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+@keyframes fx-pop-in {
+  0% { transform: scale(0.85); opacity: 0; }
+  60% { transform: scale(1.04); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes fx-shake {
+  0%, 100% { transform: translate(0, 0); }
+  20% { transform: translate(-4px, 2px); }
+  40% { transform: translate(4px, -2px); }
+  60% { transform: translate(-3px, -1px); }
+  80% { transform: translate(3px, 1px); }
+}
+@keyframes fx-pulse-dot {
+  0%, 100% { opacity: 1; r: 5; }
+  50% { opacity: 0.55; }
+}
+@keyframes fx-tick-glow {
+  0%, 100% { box-shadow: 0 0 14px rgba(45, 212, 191, 0.25); }
+  50% { box-shadow: 0 0 26px rgba(45, 212, 191, 0.55); }
+}
+@keyframes fx-grade-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.fx-float { animation: fx-float 3s ease-in-out infinite; }
+.fx-pop-in { animation: fx-pop-in 0.28s ease-out both; }
+.fx-shake { animation: fx-shake 0.35s linear; }
+.fx-tick-glow { animation: fx-tick-glow 1.6s ease-in-out infinite; }
+
+/* ============ LANDING MARQUEE ============ */
+@keyframes lab-marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.lab-marquee-track {
+  animation: lab-marquee 45s linear infinite;
+}
+.lab-marquee:hover .lab-marquee-track {
+  animation-play-state: paused;
+}
+.lab-marquee-rev .lab-marquee-track {
+  animation: lab-marquee-rev 55s linear infinite;
+}
+.lab-marquee-rev:hover .lab-marquee-track {
+  animation-play-state: paused;
+}
+@keyframes lab-marquee-rev {
+  from { transform: translateX(-50%); }
+  to { transform: translateX(0); }
+}
+
+/* ============ LANDING REVEAL + ORBIT + SPOTLIGHT ============ */
+.reveal {
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.reveal.in {
+  opacity: 1;
+  transform: none;
+}
+
+/* angka hantu seksi */
+.ghost-num {
+  position: absolute;
+  left: 50%;
+  top: -0.9em;
+  transform: translateX(-50%);
+  font-family: var(--font-inter), system-ui, sans-serif;
+  font-size: 3.2rem;
+  font-weight: 800;
+  line-height: 1;
+  color: transparent;
+  -webkit-text-stroke: 1px var(--border-strong);
+  opacity: 0.7;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* tombol brutal: bayangan keras offset */
+.btn-brutal {
+  box-shadow: 3px 3px 0 0 rgba(45, 212, 191, 0.45);
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    filter 0.15s ease;
+}
+.btn-brutal:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0 0 rgba(45, 212, 191, 0.55);
+}
+.btn-brutal:active {
+  transform: translate(2px, 2px);
+  box-shadow: 0 0 0 0 transparent;
+}
+
+/* kedip status + coretan headline */
+@keyframes fx-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.25; }
+}
+.fx-blink { animation: fx-blink 1.8s ease-in-out infinite; }
+
+@keyframes fx-draw {
+  from { stroke-dasharray: 340; stroke-dashoffset: 340; }
+  to { stroke-dasharray: 340; stroke-dashoffset: 0; }
+}
+.fx-draw path {
+  animation: fx-draw 1.1s cubic-bezier(0.22, 1, 0.36, 1) 0.35s both;
+}
+
+@keyframes orbit-cw {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+@keyframes orbit-ccw {
+  from { transform: rotate(360deg); }
+  to { transform: rotate(0deg); }
+}
+.orbit-cw { animation: orbit-cw 28s linear infinite; }
+.orbit-ccw { animation: orbit-ccw 36s linear infinite; }
+.orbit-item {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+}
+.orbit-item > span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  translate: -50% -50%;
+}
+@keyframes spin-keep {
+  from { rotate: 360deg; }
+  to { rotate: 0deg; }
+}
+@keyframes spin-keep-rev {
+  from { rotate: 0deg; }
+  to { rotate: 360deg; }
+}
+/* jaga ikon tetap tegak saat cincin berputar (properti rotate terpisah dari translate) */
+.orbit-cw > .orbit-item > span { animation: spin-keep 28s linear infinite; }
+.orbit-ccw > .orbit-item > span { animation: spin-keep-rev 36s linear infinite; }
+
+/* spotlight hover bento (desktop hover saja) */
+@media (hover: hover) {
+  .spotlight {
+    position: relative;
+  }
+  .spotlight::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+    background: radial-gradient(
+      220px circle at var(--mx, 50%) var(--my, 50%),
+      rgba(45, 212, 191, 0.14),
+      transparent 70%
+    );
+  }
+  .spotlight:hover::before {
+    opacity: 1;
+  }
 }
 
 /* ============ REDUCED MOTION ============ */

@@ -8,10 +8,10 @@ import { useParams } from "next/navigation"
 import { ArrowLeft, ExternalLink } from "lucide-react"
 import { Sidebar } from "@/components/sidebar"
 import { BackgroundFX } from "@/components/background-fx"
-import { ArcReactor } from "@/components/arc-reactor"
 import { MobileMenuTrigger } from "@/components/mobile-menu-trigger"
 import { ArMissions } from "@/components/ar-missions"
 import { ArQuiz } from "@/components/ar-quiz"
+import { LoadingScreen } from "@/components/loading-screen"
 import { useArMissions } from "@/hooks/use-ar-missions"
 import { getArModel } from "@/lib/ar-catalog"
 
@@ -21,7 +21,7 @@ const ArViewer = dynamicImport(
     ssr: false,
     loading: () => (
       <div className="glass flex h-[420px] w-full items-center justify-center rounded-2xl sm:h-[520px]">
-        <ArcReactor size="sm" className="animate-pulse-glow" />
+        <LoadingScreen label="Menyiapkan laboratorium AR…" />
       </div>
     ),
   }
@@ -43,7 +43,7 @@ export default function ArDetailPage() {
         <div className="mx-auto w-full max-w-3xl flex-1 p-4 sm:p-6">
           <Link
             href="/ar"
-            className="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-[var(--text-muted)] hover:text-[var(--accent)]"
+            className="inline-flex items-center gap-2 text-sm text-[var(--text-muted)] hover:text-[var(--accent)]"
           >
             <ArrowLeft className="h-4 w-4" />
             AR Lab
@@ -64,12 +64,12 @@ export default function ArDetailPage() {
           ) : (
             <>
               <div className="mt-3 flex flex-wrap items-center gap-2">
-                <span className="rounded-md bg-[var(--secondary)] px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-[var(--text-secondary)]">
+                <span className="rounded-md bg-[var(--secondary)] px-2 py-0.5 text-[11px] text-[var(--text-secondary)]">
                   {model.subject}
                 </span>
                 {model.placeholderAssets &&
                   model.placeholderAssets.length > 0 && (
-                    <span className="rounded-md bg-amber-500/15 px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-amber-300">
+                    <span className="rounded-md bg-amber-500/15 px-2 py-0.5 text-[11px] text-amber-300">
                       Aset sementara ({model.placeholderAssets.join(", ")})
                     </span>
                   )}
@@ -91,10 +91,29 @@ export default function ArDetailPage() {
               </div>
 
               <ArMissions missions={missions} />
-              <ArQuiz model={model} onPassed={() => notify("quiz")} />
+              <ArQuiz key={model.id} model={model} onPassed={() => notify("quiz")} />
 
-              <p className="mt-4 flex flex-wrap items-center gap-1 font-mono text-[10px] uppercase tracking-wider text-[var(--text-muted)]">
-                Lisensi aset: {model.license.author} — {model.license.name}
+              <div className="mt-4 flex flex-wrap gap-2">
+                <Link
+                  href="/lab/proyektil"
+                  className="glass rounded-xl px-4 py-2 text-xs text-[var(--accent)] hover:border-[var(--border-strong)]"
+                >
+                  Coba simulasi interaktifnya di Lab
+                </Link>
+                {model.subject === "Kimia" && (
+                  <Link href="/lab/h2o" className="glass rounded-xl px-4 py-2 text-xs text-[var(--accent)]">
+                    Putar molekul H2O 3D
+                  </Link>
+                )}
+                {model.subject === "Fisika" && (
+                  <Link href="/lab/bandul" className="glass rounded-xl px-4 py-2 text-xs text-[var(--accent)]">
+                    Ayun bandul 3D
+                  </Link>
+                )}
+              </div>
+
+              <p className="mt-4 flex flex-wrap items-center gap-1 text-xs text-[var(--text-muted)]">
+                Lisensi aset: {model.license.author}, {model.license.name}
                 {model.license.url && (
                   <a
                     href={model.license.url}

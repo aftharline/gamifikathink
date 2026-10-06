@@ -1,5 +1,5 @@
 -- ============================================================
--- GAMIFIKATHINK — Supabase Schema (PostgreSQL)
+-- GAMIFIKATHINK: Supabase Schema (PostgreSQL)
 -- ============================================================
 -- Cara pakai:
 -- 1. Buka Supabase Dashboard > SQL Editor

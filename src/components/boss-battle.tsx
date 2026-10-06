@@ -10,14 +10,20 @@ import {
   ChevronLeft,
 } from "lucide-react"
 import { ArcReactor } from "@/components/arc-reactor"
+import { LoadingScreen } from "@/components/loading-screen"
 import { Button } from "@/components/ui/button"
 import { MobileMenuTrigger } from "@/components/mobile-menu-trigger"
 import { BackgroundFX } from "@/components/background-fx"
 import { cn } from "@/lib/utils"
-import { BOSSES, getFallbackQuestions, shuffleQuestions, type QuizQuestion } from "@/lib/quiz-bank"
+import { BOSSES, getFallbackQuestions, isValidQuizQuestion, shuffleQuestions, type QuizQuestion } from "@/lib/quiz-bank"
 import { XP_REWARDS } from "@/lib/xp"
 import { grantXp } from "@/lib/xp-events"
 import { celebrate, sfx } from "@/lib/feedback"
+import { touchStreak } from "@/lib/streak"
+import { createClient } from "@/lib/supabase/client"
+import { ShareButton } from "@/components/share-button"
+import { getSubject, getLevel } from "@/lib/subjects"
+import { ensureAiAccess, consumeLocalQuota, handleGateResponse } from "@/lib/ai-gate"
 
 const BOSS_HP = 100
 const HEARTS = 3
@@ -48,10 +54,14 @@ interface BossBattleProps {
   subject: string
   level: string
   questionTime?: number
+  count?: number
+  quizType?: "mcq" | "tf"
+  difficulty?: string
+  sourceText?: string
   onExit: () => void
 }
 
-export function BossBattle({ subject, level, questionTime = 30, onExit }: BossBattleProps) {
+export function BossBattle({ subject, level, questionTime = 30, count = 5, quizType = "mcq", difficulty = "standar", sourceText, onExit }: BossBattleProps) {
   const [questions, setQuestions] = useState<QuizQuestion[] | null>(null)
   const [state, setState] = useState<BattleState>(INITIAL_STATE)
   const [status, setStatus] = useState<BattleStatus>("loading")
@@ -60,21 +70,37 @@ export function BossBattle({ subject, level, questionTime = 30, onExit }: BossBa
   const [timeLeft, setTimeLeft] = useState(questionTime)
   const [xpEarned, setXpEarned] = useState(0)
   const [bossDefeated, setBossDefeated] = useState(false)
+  const [lastPoints, setLastPoints] = useState(0)
   const finishedRef = useRef(false)
+  const feedbackTimeoutRef = useRef<number | null>(null)
 
   const boss = BOSSES[subject] ?? BOSSES["Matematika"]
 
   const loadQuestions = useCallback(() => {
     finishedRef.current = false
+    // Jatah AI tamu: total 1x (login = bebas)
+    void ensureAiAccess().then((gate) => {
+      if (!gate.ok) {
+        setQuestions(getFallbackQuestions(subject))
+        setStatus("playing")
+        return
+      }
+      if (gate.guest) consumeLocalQuota()
     fetch("/api/quiz", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ subject, level }),
+      body: JSON.stringify({ subject, level, count, type: quizType, difficulty, sourceText }),
     })
-      .then((r) => r.json())
+      .then((r) => {
+        if (handleGateResponse(r.status)) throw new Error("LOGIN_REQUIRED")
+        return r.json()
+      })
       .then((data) => {
-        if (Array.isArray(data?.questions) && data.questions.length > 0) {
-          setQuestions(shuffleQuestions(data.questions))
+        const apiQuestions = Array.isArray(data?.questions)
+          ? data.questions.filter(isValidQuizQuestion)
+          : []
+        if (apiQuestions.length > 0) {
+          setQuestions(shuffleQuestions(apiQuestions))
         } else {
           setQuestions(getFallbackQuestions(subject))
         }
@@ -84,10 +110,14 @@ export function BossBattle({ subject, level, questionTime = 30, onExit }: BossBa
         setQuestions(getFallbackQuestions(subject))
         setStatus("playing")
       })
-  }, [subject, level])
+    })
+  }, [subject, level, count, quizType, difficulty, sourceText])
 
   useEffect(() => {
     loadQuestions()
+    return () => {
+      if (feedbackTimeoutRef.current !== null) window.clearTimeout(feedbackTimeoutRef.current)
+    }
   }, [loadQuestions])
 
   const finish = useCallback(
@@ -107,8 +137,21 @@ export function BossBattle({ subject, level, questionTime = 30, onExit }: BossBa
         sfx.wrong()
       }
       grantXp(xp)
+      touchStreak()
+      // simpan attempt untuk dashboard/knowledge gaps (guest-safe)
+      try {
+        const supabase = createClient()
+        supabase.auth.getUser().then(({ data: { user } }) => {
+          if (!user || !questions) return
+          void supabase.from("quiz_attempts").insert({
+            user_id: user.id, subject, level,
+            mode: count > 5 ? "exam" : quizType === "tf" ? "tf" : "boss",
+            score: state.correctCount, total: questions.length,
+          })
+        })
+      } catch { /* abaikan */ }
     },
-    [state.correctCount]
+    [state.correctCount, questions, subject, level, count, quizType]
   )
 
   useEffect(() => {
@@ -124,8 +167,10 @@ export function BossBattle({ subject, level, questionTime = 30, onExit }: BossBa
       const q = questions[Math.min(state.qIndex, questions.length - 1)]
       if (!q) return
       const correct = idx === q.answerIndex
+      const gained = correct ? 100 * Math.min(state.combo + 1, 5) : 0
       setSelected(idx)
       setFeedback(correct ? "correct" : "wrong")
+      setLastPoints(gained)
       if (correct) sfx.correct()
       else sfx.wrong()
       setState((prev) => {
@@ -142,7 +187,9 @@ export function BossBattle({ subject, level, questionTime = 30, onExit }: BossBa
           correctCount: prev.correctCount + (correct ? 1 : 0),
         }
       })
-      window.setTimeout(() => {
+      if (feedbackTimeoutRef.current !== null) window.clearTimeout(feedbackTimeoutRef.current)
+      feedbackTimeoutRef.current = window.setTimeout(() => {
+        feedbackTimeoutRef.current = null
         setSelected(null)
         setFeedback(null)
         setTimeLeft(questionTime)
@@ -153,7 +200,7 @@ export function BossBattle({ subject, level, questionTime = 30, onExit }: BossBa
         )
       }, 1700)
     },
-    [questions, status, selected, state.qIndex, questionTime]
+    [questions, status, selected, state.qIndex, state.combo, questionTime]
   )
 
   useEffect(() => {
@@ -173,9 +220,14 @@ export function BossBattle({ subject, level, questionTime = 30, onExit }: BossBa
   }, [timeLeft, status, selected, questions, answer])
 
   const handleRestart = () => {
+    if (feedbackTimeoutRef.current !== null) {
+      window.clearTimeout(feedbackTimeoutRef.current)
+      feedbackTimeoutRef.current = null
+    }
     setState(INITIAL_STATE)
     setSelected(null)
     setFeedback(null)
+    setLastPoints(0)
     setTimeLeft(questionTime)
     setXpEarned(0)
     setBossDefeated(false)
@@ -183,19 +235,16 @@ export function BossBattle({ subject, level, questionTime = 30, onExit }: BossBa
     loadQuestions()
   }
 
-  const timePct = (timeLeft / questionTime) * 100
+  const timePct = questionTime > 0 ? (timeLeft / questionTime) * 100 : 0
   const bossHpPct = (state.bossHp / BOSS_HP) * 100
   const question = questions?.[Math.min(state.qIndex, questions.length - 1)]
-  const pointsGained = 100 * Math.min(state.combo + 1, 5)
+  const pointsGained = lastPoints
 
   if (status === "loading" || !questions || !question) {
     return (
       <div className="relative flex h-full flex-col items-center justify-center">
         <BackgroundFX />
-        <ArcReactor size="lg" className="animate-pulse-glow" />
-        <p className="mt-6 font-mono text-xs uppercase tracking-[0.3em] text-[var(--text-muted)]">
-          Menerbangkan {boss.name}…
-        </p>
+        <LoadingScreen label={`Menerbangkan ${boss.name}…`} />
       </div>
     )
   }
@@ -220,30 +269,44 @@ export function BossBattle({ subject, level, questionTime = 30, onExit }: BossBa
           </button>
         </div>
         <div className="flex items-center gap-2">
-          <span className="rounded-md bg-[var(--secondary)] px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-[var(--text-secondary)]">
-            {subject} • {level}
+          <span className="flex items-center gap-1.5 rounded-md bg-[var(--secondary)] px-2 py-0.5 text-[11px] text-[var(--text-secondary)]">
+            {(() => {
+              const S = getSubject(subject)
+              const L = getLevel(level)
+              return (
+                <>
+                  <S.icon className="h-3 w-3" style={{ color: S.color }} />
+                  {subject} • <L.icon className="h-3 w-3" style={{ color: L.color }} />{level}
+                </>
+              )
+            })()}
           </span>
-          <span className="rounded-md bg-[var(--secondary)] px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-[var(--accent)]">
+          <span className="rounded-md bg-[var(--secondary)] px-2 py-0.5 text-[11px] text-[var(--accent)]">
             Soal {Math.min(state.qIndex + 1, questions.length)}/{questions.length}
           </span>
         </div>
       </div>
 
       {/* Boss card */}
-      <div className="glass mx-auto mb-4 w-full max-w-md rounded-2xl p-5 text-center">
+      <div
+        className={cn(
+          "glass mx-auto mb-4 w-full max-w-md rounded-2xl p-5 text-center transition-shadow",
+          bossHpPct <= 25 && "animate-border-glow"
+        )}
+      >
         <ArcReactor size="lg" className="mx-auto" />
         <h2 className="mt-3 glow-text-cyan font-sans text-xl font-bold text-[var(--text-primary)]">
           {boss.name}
         </h2>
-        <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-[var(--text-muted)]">
+        <p className="font-display text-sm text-[var(--text-muted)]">
           {boss.title}
         </p>
         <p className="mt-2 text-xs italic text-[var(--text-secondary)]">
           &ldquo;{boss.quote}&rdquo;
         </p>
         <div className="mt-4">
-          <div className="mb-1 flex justify-between font-mono text-[10px] uppercase tracking-wider text-[var(--text-muted)]">
-            <span>HP BOSS</span>
+          <div className="mb-1 flex justify-between text-xs text-[var(--text-secondary)]">
+            <span>HP Bos</span>
             <span>{state.bossHp}/{BOSS_HP}</span>
           </div>
           <div className="h-2.5 overflow-hidden rounded-full bg-[var(--secondary)]">
@@ -279,12 +342,12 @@ export function BossBattle({ subject, level, questionTime = 30, onExit }: BossBa
         </div>
         <div className="flex items-center gap-3">
           {state.combo >= 2 && (
-            <span className="flex items-center gap-1 font-mono text-xs font-bold text-[var(--gold)]">
+            <span className="flex items-center gap-1 text-xs font-bold text-[var(--gold)]">
               <Zap className="h-4 w-4" />
-              x{Math.min(state.combo, 5)} COMBO
+              Kombo x{Math.min(state.combo, 5)}
             </span>
           )}
-          <span className="font-mono text-sm font-bold text-[var(--accent)]">
+          <span className="text-sm font-bold text-[var(--accent)]">
             {state.score.toLocaleString("id-ID")}
           </span>
         </div>
@@ -292,9 +355,9 @@ export function BossBattle({ subject, level, questionTime = 30, onExit }: BossBa
 
       {/* Timer */}
       <div className="mx-auto mb-4 w-full max-w-md">
-        <div className="mb-1 flex justify-between font-mono text-[10px] uppercase tracking-wider text-[var(--text-muted)]">
-          <span>Waktu</span>
-          <span className={cn(timeLeft <= 6 && "animate-pulse text-red-400")}>{timeLeft}s</span>
+        <div className="mb-1 flex justify-between text-xs text-[var(--text-secondary)]">
+          <span>Sisa waktu</span>
+          <span className={cn(timeLeft <= 6 && "animate-pulse text-red-400")}>{timeLeft} dtk</span>
         </div>
         <div className="h-1.5 overflow-hidden rounded-full bg-[var(--secondary)]">
           <div
@@ -360,8 +423,8 @@ export function BossBattle({ subject, level, questionTime = 30, onExit }: BossBa
                   : "border-red-500/40 bg-red-500/10 text-red-300"
               )}
             >
-              <span className="mb-1 block font-mono text-[10px] uppercase tracking-[0.2em]">
-                {feedback === "correct" ? `BENAR! +${pointsGained}` : "SALAH"}
+              <span className="mb-1 block text-xs font-bold">
+                {feedback === "correct" ? `Benar! +${pointsGained}` : "Kurang tepat"}
               </span>
               <span className="text-[var(--text-secondary)]">{question.explanation}</span>
             </div>
@@ -388,18 +451,18 @@ export function BossBattle({ subject, level, questionTime = 30, onExit }: BossBa
             >
               {status === "won"
                 ? bossDefeated
-                  ? "BOSS DIKALAHKAN!"
-                  : "MISI BERHASIL"
-                : "MISI GAGAL"}
+                  ? "Bos dikalahkan!"
+                  : "Misi berhasil"
+                : "Misi gagal"}
             </h2>
             <p className="mt-1 text-xs text-[var(--text-secondary)]">
               {status === "won"
                 ? bossDefeated
-                  ? `${boss.name} tumbang oleh pukulanmu.`
-                  : "Semua soal terjawab dan kamu selamat, Warrior!"
-                : `${boss.name} masih bertahan. Bangkit dan lawan lagi, Warrior!`}
+                  ? <>{boss.name} tumbang oleh pukulanmu.</>
+                  : <>Semua soal terjawab dan kamu selamat, <span className="font-display">Warrior</span>!</>
+                : <>{boss.name} masih bertahan. Bangkit dan lawan lagi, <span className="font-display">Warrior</span>!</>}
             </p>
-            <div className="mt-4 space-y-2 rounded-2xl bg-[var(--surface-2)] p-4 font-mono text-sm">
+            <div className="mt-4 space-y-2 rounded-2xl bg-[var(--surface-2)] p-4 text-sm">
               <div className="flex justify-between text-[var(--text-secondary)]">
                 <span>Skor</span>
                 <span className="text-[var(--text-primary)]">{state.score.toLocaleString("id-ID")}</span>
@@ -410,7 +473,7 @@ export function BossBattle({ subject, level, questionTime = 30, onExit }: BossBa
               </div>
               <div className="flex justify-between text-[var(--text-secondary)]">
                 <span>Jawaban Benar</span>
-                <span className="text-teal-300">{state.correctCount}/5</span>
+                <span className="text-teal-300">{state.correctCount}/{questions.length}</span>
               </div>
               <div className="flex justify-between border-t border-[var(--border)] pt-2 text-[var(--text-secondary)]">
                 <span>XP Diperoleh</span>
@@ -438,6 +501,9 @@ export function BossBattle({ subject, level, questionTime = 30, onExit }: BossBa
               >
                 Ganti Mapel
               </Button>
+            </div>
+            <div className="mt-2 flex justify-center">
+              <ShareButton title={`Kuis ${subject} ${state.correctCount}/${questions.length}`} payload={{ type: "quiz", subject, level, score: state.correctCount, total: questions.length, questions }} />
             </div>
           </div>
         </div>
